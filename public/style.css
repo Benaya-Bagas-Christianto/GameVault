@@ -1,0 +1,1023 @@
+/* --- [1] GANTI FONT KE GAYA "WEB STATIS" (POPPINS) --- */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap');
+
+:root {
+    /* Tetap pakai Warna Baru (Hitam), BUKAN Biru Lama */
+    --bg-main: #000000;
+    --bg-card: #111111;
+    --border-color: #404040;
+    --accent: #ffffff;
+    --text-main: #ffffff;
+    --text-muted: #a3a3a3;
+}
+
+/* --- INI KODE BODY KAMU (JANGAN DIUBAH) --- */
+/* --- [1] SETTING UTAMA BODY (Revisi) --- */
+body {
+    background-color: #0A0C10 !important;
+    background-image: none !important; /* INI YANG MENGHAPUS BINTIKNYA */
+    color: #FFFFFF;
+}
+
+/* --- [2] KHUSUS JUDUL (Biar Tetap Tebal & Gagah) --- */
+h1, h2, h3, h4, h5, h6, 
+.gaming-title, 
+.font-orbitron {
+    font-weight: 900 !important; /* Judul tetap Super Bold */
+    letter-spacing: 1px;
+}
+
+/* --- [3] KHUSUS ISI TEKS & DESKRIPSI (Biar Enak Dibaca) --- */
+p, span, li, input, textarea, div {
+    /* Pastikan teks biasa mengikuti ketebalan normal */
+    font-weight: 500; 
+}
+
+/* --- [4] FIX TAMBAHAN UNTUK DESKRIPSI HTML (PENTING) --- */
+.desc-content {
+    font-weight: 400 !important; /* Teks paragraf tipis */
+    line-height: 1.8 !important;
+    color: #d1d5db !important;
+}
+
+.desc-content h3 {
+    font-weight: 900 !important; /* Judul poin di deskripsi tebal */
+    color: #ffffff !important;
+    font-size: 1.25rem !important;
+    margin-top: 1.5rem !important;
+}
+
+/* JUDUL & LOGO */
+.gaming-title {
+    /* KEMBALI KE FONT ORBITRON (Font Web Lama) */
+    font-family: 'Orbitron', monospace !important;
+    font-weight: 900;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+
+    /* Warna Tetap Putih/Tema Baru (Bukan Biru) */
+    color: var(--text-main);
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+}
+
+/* --- [3] KARTU GAME (RE-COLOR) --- */
+.gaming-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+}
+
+/* --- [6] INPUT PENCARIAN --- */
+.search-input {
+    background: #111 !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-main) !important;
+}
+
+/* REVISI: Fokus Pencarian jadi Putih */
+.search-input:focus {
+    border-color: #ffffff !important;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.2) !important;
+    outline: none !important;
+}
+
+/* --- [7] TOMBOL UTAMA (BELI/LOGIN) --- */
+.btn-primary {
+    background: var(--accent);
+    color: #000;
+    font-weight: 700;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.btn-primary:hover {
+    background: #e5e5e5;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 255, 255, 0.2);
+}
+
+.btn-secondary {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+}
+
+/* REVISI: Hover Tombol Detail jadi Putih */
+.btn-secondary:hover {
+    background: #ffffff;
+    /* Jadi Putih */
+    color: #000000;
+    /* Teks Hitam */
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(255, 255, 255, 0.2);
+}
+
+/* --- [8] NAVIGATION & HAMBURGER --- */
+.section {
+    display: none;
+    /* Default sembunyi */
+}
+
+.section.active {
+    display: block;
+    /* Muncul jika aktif */
+}
+
+/* Hamburger Menu Colors */
+.hamburger-btn .line {
+    background: var(--text-main);
+}
+
+.hamburger-nav-link {
+    background: #111;
+    border: 1px solid transparent;
+    color: var(--text-muted);
+}
+
+/* REVISI: Hover Menu Mobile jadi Putih */
+.hamburger-nav-link:hover {
+    border-color: #ffffff;
+    /* Garis Putih */
+    background: #333333;
+    /* Background Abu */
+    color: #ffffff;
+    /* Teks Putih */
+}
+
+.hamburger-nav-link.active {
+    background: var(--accent);
+    color: #000;
+    font-weight: 700;
+}
+
+/* Nav Link Biasa */
+.nav-link {
+    color: var(--text-muted);
+}
+
+/* REVISI: Hover Menu Navigasi jadi Putih */
+.nav-link:hover {
+    color: #ffffff;
+    /* Teks jadi Putih */
+    transform: translateY(-2px);
+}
+
+.nav-link.active::after {
+    background: var(--accent);
+}
+
+/* --- [9] TOAST NOTIFICATION (POPUP PESAN) --- */
+#toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.toast-box {
+    background: #111 !important;
+    border: 1px solid var(--border-color) !important;
+    color: #fff;
+    padding: 15px 20px;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    min-width: 300px;
+    animation: slideInToast 0.5s forwards;
+    position: relative;
+}
+
+.toast-box.success {
+    border-left: 4px solid #10b981 !important;
+}
+
+.toast-box.error {
+    border-left: 4px solid #ef4444 !important;
+}
+
+.toast-box button {
+    color: #666 !important;
+    opacity: 1 !important;
+    transition: color 0.2s;
+}
+
+.toast-box button:hover {
+    color: #fff !important;
+}
+
+@keyframes slideInToast {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes smoothFadeOut {
+    to {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+}
+
+.toast-exit-smooth {
+    animation: smoothFadeOut 0.5s forwards;
+}
+
+/* --- [10] UTILITY CLASSES & FIXES --- */
+input:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 30px #111 inset !important;
+    -webkit-text-fill-color: white !important;
+}
+
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #000;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card-animate {
+    animation: fadeInUp 0.6s ease-out forwards;
+}
+
+.line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* --- [11] MAGIC OVERRIDE (MEMAKSA WARNA HITAM PADA ELEMEN JS) --- */
+
+/* Modal & Popup Hitam */
+.bg-\[\#1b2838\],
+.bg-\[\#16202b\] {
+    background-color: #111111 !important;
+    border-color: #444 !important;
+    box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.8) !important;
+}
+
+/* Teks & Harga */
+.text-cyan-300,
+.text-cyan-400 {
+    color: #fff !important;
+}
+
+.text-yellow-400 {
+    color: #fff !important;
+    background: #222 !important;
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px solid #444;
+}
+
+/* Border & Tombol */
+.border-cyan-500,
+.border-cyan-500\/20,
+.border-cyan-500\/30,
+.border-cyan-500\/50 {
+    border-color: #444 !important;
+}
+
+button[onclick^="addToCart"] {
+    background-image: none !important;
+    background-color: #ffffff !important;
+    color: #000000 !important;
+}
+
+button[onclick^="addToCart"]:hover {
+    background-color: #e0e0e0 !important;
+}
+
+button[onclick^="openGameModal"] {
+    border-color: #666 !important;
+    color: #ccc !important;
+    background: transparent !important;
+}
+
+button[onclick^="openGameModal"]:hover {
+    border-color: #fff !important;
+    color: #fff !important;
+    background: #222 !important;
+}
+
+/* --- [12] UTILITY KHUSUS (SOLUSI MASALAH KAMU) --- */
+
+/* Hapus .hidden yang global karena merusak navigasi */
+/* GANTI DENGAN INI: Hanya sembunyikan section konten utama */
+#homeGenreSection.hidden,
+#homeGamesSection.hidden,
+#loginModal.hidden,
+#registerModal.hidden {
+    display: none !important;
+}
+
+/* Utility lain tetap aman */
+.opacity-0 {
+    opacity: 0 !important;
+    pointer-events: none;
+}
+
+.opacity-100 {
+    opacity: 1 !important;
+    pointer-events: auto;
+}
+
+.max-h-0 {
+    max-height: 0 !important;
+    overflow: hidden !important;
+}
+
+.mb-0 {
+    margin-bottom: 0 !important;
+}
+
+.mb-16 {
+    margin-bottom: 4rem !important;
+}
+
+/* Transisi */
+#homeGenreSection,
+#homeGamesSection {
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 6. GANTI JADI GLOW CYAN (Bukan Putih lagi) */
+.gaming-card:hover {
+    border-color: rgba(79, 88, 90, 0.5) !important;
+    background-color: #1a1a1a !important;
+    box-shadow: 0 0 25px rgba(58, 63, 64, 0.2) !important;
+}
+
+
+/* 1. Paksa Background Overlay jadi Bening (30%) */
+#gameDetailModalOverlay {
+    background-color: rgba(0, 0, 0, 0.3) !important;
+    /* 0.3 = 30% Gelap (Sangat Bening) */
+    backdrop-filter: blur(4px) !important;
+}
+
+/* 2. Paksa Kotak Harga Pas & Kecil */
+.modal-price-box {
+    width: fit-content !important;
+    /* Lebar sesuai isi teks saja */
+    min-width: 0 !important;
+    /* Hapus batas minimal */
+    margin-left: auto !important;
+    /* Posisi Tengah */
+    margin-right: auto !important;
+    /* Posisi Tengah */
+    display: inline-flex !important;
+    /* Memanjang ke samping sesuai isi */
+    padding: 6px 16px !important;
+}
+
+/* 3. Paksa Ukuran Modal Keseluruhan Kembali Kecil */
+.modal-content-box {
+    max-width: 42rem !important;
+    /* Setara max-w-2xl */
+}
+
+
+div[id*="cart"],
+div[id*="Cart"],
+div[id*="keranjang"],
+#cartModal {
+    background-color: rgba(0, 0, 0, 0.4) !important;
+    /* Hitam transparan */
+    backdrop-filter: blur(8px) !important;
+    /* Efek Blur */
+    -webkit-backdrop-filter: blur(8px) !important;
+}
+
+/* 2. TOMBOL CHECKOUT (Supaya Lonjong & Rapi) */
+div[id*="cart"] button.bg-cyan-400,
+div[id*="Cart"] button.bg-cyan-400,
+#cartModal button.bg-cyan-400 {
+    width: fit-content !important;
+    /* Lebar mengikuti teks (tidak full) */
+    min-width: 180px !important;
+    /* Lebar minimal biar enak dilihat */
+    border-radius: 50px !important;
+    /* Bentuk kapsul/lonjong */
+    padding: 12px 40px !important;
+    /* Tebalkan padding */
+
+    /* Posisi Tengah */
+    margin-left: auto !important;
+    margin-right: auto !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+
+    /* Efek Glow */
+    box-shadow: 0 0 20px rgba(79, 90, 92, 0.4) !important;
+}
+
+/* 3. PERBAIKAN WADAH KARTU (Supaya isinya tetap terbaca) 
+Bagian kotak tempat list barang harus hitam solid, 
+biar tidak ikut transparan dan bikin pusing.
+*/
+div[id*="cart"]>div.relative,
+div[id*="Cart"]>div.relative {
+    background-color: #111111 !important;
+    /* Hitam Solid */
+    border: 1px solid #333 !important;
+    /* Garis tepi tipis */
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* 4. MENGHILANGKAN GARIS KOTAK PADA LIST ITEM (Opsional biar rapi) */
+div[id*="cart"] li,
+div[id*="Cart"] li {
+    border-color: #333 !important;
+    /* Ubah warna garis pemisah item jadi gelap */
+}
+
+/* === PAKSA KOTAK HARGA JADI PENDEK (SOLUSI FINAL) === */
+
+/* 1. Target Kotak Harga di Detail Game */
+.modal-price-box {
+    /* Paksa lebar mengikuti teks */
+    width: fit-content !important;
+    min-width: auto !important;
+
+    /* Pastikan bentuknya lonjong dan di tengah */
+    display: inline-flex !important;
+    justify-content: center !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    border-radius: 999px !important;
+}
+
+/* 2. Target Tombol Checkout di Keranjang (Biar sekalian rapi) */
+#btnCheckout {
+    width: fit-content !important;
+    display: block !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    border-radius: 999px !important;
+}
+
+.game-price {
+    display: inline-block !important;
+    width: auto !important;
+    max-width: none !important;
+
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 700;
+
+    background: #ffffff;
+    color: #000000;
+    border: 1px solid #ffffff;
+    border-radius: 999px;
+
+    white-space: nowrap;
+}
+
+.mt-2.flex span {
+    flex: 0 0 auto !important;
+}
+
+/* FIX HARGA DI KERANJANG AGAR TIDAK MEMANJANG */
+.cart-price {
+    display: inline-block !important;
+    width: fit-content !important;
+    white-space: nowrap;
+
+    padding: 6px 14px;
+    font-weight: 700;
+    font-size: 14px;
+
+    background: #222;
+    color: #fff;
+
+    border: 1px solid #444;
+    border-radius: 8px;
+}
+
+/* ============================================================
+🔥 SOLUSI FINAL: MATIKAN WARNA PUTIH SAAT HOVER (FORCE) 🔥
+   ============================================================ */
+
+/* 1. Paksa Kartu Tetap Hitam (Jangan pernah jadi putih) */
+.gaming-card:hover {
+    background-color: #0a0a0a !important;
+    /* Tetap Hitam Gelap */
+    border-color: hsl(180, 3%, 26%) !important;
+    /* Garis Pinggir Cyan */
+    box-shadow: 0 0 25px rgba(6, 182, 212, 0.4) !important;
+    /* Cahaya Cyan */
+    transform: translateY(-5px) !important;
+    /* Efek naik sedikit */
+}
+
+/* 2. Paksa Judul & Teks Tetap Terbaca */
+.gaming-card:hover h3,
+.gaming-card:hover p,
+.gaming-card:hover span {
+    color: white !important;
+    /* Teks Putih */
+}
+
+/* 3. Paksa Tombol Kecil (Wishlist) jadi Cyan saat disentuh */
+.gaming-card button:hover {
+    background-color: #434b4d !important;
+    /* Background Cyan */
+    color: black !important;
+    /* Icon Hitam */
+    box-shadow: 0 0 10px #4c4e4f !important;
+}
+
+/* --- FIX: WARNA TOMBOL KAPSUL & PLATFORM PILLS JADI HITAM / PUTIH --- */
+.pill-btn {
+    background-color: #111 !important;
+    border: 1px solid #333 !important;
+    color: #888 !important;
+    transition: all 0.3s ease !important;
+    box-shadow: none !important;
+}
+
+/* Saat Kursor Diarahkan (Hover) & Aktif -> Glow Putih */
+.pill-btn:hover,
+    .pill-btn.active {
+        background-color: #ffffff !important;
+        color: #000000 !important;
+        border-color: #ffffff !important;
+        box-shadow: 0 0 15px rgba(255, 255, 255, 0.5) !important;
+    }
+
+.platform-card svg,
+.platform-card h3 {
+    color: #888888 !important;
+    /* Paksa Abu */
+    transition: all 0.2s !important;
+}
+
+/* Icon & Teks saat Hover jadi Putih */
+.platform-card:hover h3,
+.platform-card:hover svg {
+    color: #ffffff !important;
+    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));
+}
+
+
+
+/* Icon & Teks saat Selected Putih Bersinar */
+.platform-card.selected h3,
+.platform-card.selected svg {
+    color: #ffffff !important;
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
+}
+
+/* ========================================================
+AVIGASI: INSTANT SWITCH (GAYA WEB STATIS)
+   ======================================================== */
+
+/* ========================================================
+[1] NAVIGASI: POP UP HOVER + INSTANT KLIK
+   ======================================================== */
+
+/* 1. Aturan Dasar Link Menu */
+.nav-link,
+.hamburger-nav-link {
+    color: #888888 !important;
+    /* Warna Abu saat tidak aktif */
+    position: relative;
+    text-decoration: none;
+
+    /* PENTING: Nyalakan transisi untuk warna dan posisi (transform) */
+    /* Pakai 'cubic-bezier' biar efek naiknya agak membal sedikit */
+    transition: color 0.2s ease, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+}
+
+/* 2. Saat Disorot (Hover) -> NAIK (Pop Up) */
+.nav-link:hover,
+.hamburger-nav-link:hover {
+    color: #ffffff !important;
+    /* Jadi Putih */
+    transform: translateY(-5px);
+    /* NAIK 5 pixel ke atas */
+}
+
+/* 3. Saat Aktif/Diklik -> Kembali Turun & Garis Muncul */
+.nav-link.active,
+.hamburger-nav-link.active {
+    color: #ffffff !important;
+    transform: translateY(0);
+    /* Kembali ke posisi semula */
+}
+
+/* 4. Garis Bawah (Default: Sembunyi) */
+.nav-link::after,
+.hamburger-nav-link::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    bottom: -4px;
+    left: 0;
+    background: #ffffff;
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
+
+    /* Garis sembunyi dulu */
+    display: none !important;
+    opacity: 0;
+}
+
+/* 5. Garis Bawah Muncul (HANYA SAAT AKTIF/KLIK) */
+/* Kita pakai 'display: block' biar munculnya instan */
+.nav-link.active::after,
+.hamburger-nav-link.active::after {
+    display: block !important;
+    opacity: 1 !important;
+}
+
+/* 3. Paksa tombol/icon aktif jadi putih (biasanya icon love/wishlist) */
+svg.text-cyan-400,
+button .text-cyan-400 {
+    color: #ffffff !important;
+    fill: #ffffff !important;
+    /* Kalau iconnya solid */
+    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.8));
+    /* Efek Glow Putih */
+}
+
+/* 4. Ubah Shadow/Glow Biru jadi Putih */
+[class*="shadow-cyan-"] {
+    --tw-shadow-color: rgba(255, 255, 255, 0.5) !important;
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.3) !important;
+}
+
+/* =======================================================
+JURUS KUNCI: MEMAKSA KARTU GAME JADI GLOW PUTIH
+(Mengalahkan setelan warna biru dari JavaScript)
+   ======================================================= */
+
+/* 1. Target Class Kartu Game (.gaming-card) */
+.gaming-card {
+    transition: all 0.3s ease !important;
+}
+
+/* 2. Saat Kursor Diarahkan (HOVER) -> Paksa Putih */
+.gaming-card:hover {
+    /* Ganti garis pinggir jadi PUTIH */
+    border-color: #ffffff !important;
+
+    /* Ganti efek bayangan (Glow) jadi PUTIH BERCAHAYA */
+    box-shadow: 0 0 25px rgba(255, 255, 255, 0.5) !important;
+
+    /* Pastikan tidak ada warna biru aneh */
+    --tw-shadow-color: transparent !important;
+}
+
+/* 3. Saat Kartu Diklik/Aktif (ACTIVE) -> Paksa Putih */
+.gaming-card:active,
+.gaming-card:focus-within {
+    border-color: #ffffff !important;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.8) !important;
+}
+
+/* 4. Hapus sisa-sisa teks biru di dalam kartu */
+.gaming-card .text-cyan-400,
+.gaming-card .text-cyan-500,
+.gaming-card [class*="text-cyan"] {
+    color: #ffffff !important;
+    /* Paksa teks jadi putih */
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5) !important;
+}
+
+/* --- TAMBAHAN: ANIMASI NAVIGASI SMOOTH --- */
+@keyframes smoothAppear {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+        /* Mulai dari sedikit di bawah */
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+        /* Kembali ke posisi asal */
+    }
+}
+
+/* Kelas ini akan ditempel oleh JavaScript nanti */
+.section-animate {
+    animation: smoothAppear 0.4s ease-out forwards;
+}
+
+
+/* ========================================================
+[2] PLATFORM CARD: ELEGAN & HALUS
+   ======================================================== */
+
+.platform-card {
+    background-color: #111111 !important;
+    border: 1px solid #404040 !important;
+    color: #888888 !important;
+    box-shadow: none !important;
+
+    /* Transisi standar yang mulus (tidak membal) */
+    transition: all 0.3s ease !important;
+}
+
+/* SAAT HOVER (DISOROT) -> DIAM */
+.platform-card:hover {
+    background-color: #1a1a1a !important;
+    border-color: #ffffff !important;
+    transform: none !important; /* DIAM DI TEMPAT */
+    box-shadow: 0 10px 20px rgba(255, 255, 255, 0.1) !important;
+    z-index: 10;
+}
+
+/* Pastikan Ikon & Teks di dalamnya ikut berubah jadi putih */
+.platform-card svg,
+.platform-card h3 {
+    color: #888888 !important;
+    transition: color 0.2s ease !important;
+}
+
+.platform-card:hover svg,
+.platform-card:hover h3,
+.platform-card.selected svg,
+.platform-card.selected h3 {
+    color: #ffffff !important;
+    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.8));
+}
+
+/* SAAT DIPILIH (ACTIVE) -> Diam di tempat tapi nyala */
+.platform-card.selected {
+    background-color: #222 !important;
+    border-color: #ffffff !important;
+    transform: none !important; /* DIAM DI TEMPAT */
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2) !important;
+}
+/* ========================================================
+[1] GENRE TAG: TOMBOL KATEGORI (TEMA GLOW PUTIH)
+   ======================================================== */
+
+.genre-tag {
+    /* Keadaan Diam: Hitam, Garis Abu, Teks Abu */
+    background-color: #111111 !important;
+    border: 1px solid #404040 !important;
+    color: #888888 !important;
+
+    /* Reset Shadow */
+    box-shadow: none !important;
+    --tw-shadow: 0 0 0 transparent !important;
+
+    /* Transisi Halus */
+    transition: all 0.3s ease !important;
+}
+
+/* SAAT DISOROT (HOVER) -> MENYALA PUTIH */
+.genre-tag:hover {
+    background-color: #000000 !important;
+    /* Background tetap gelap biar glow kontras */
+    border-color: #ffffff !important;
+    /* Garis Tepi Putih */
+    color: #ffffff !important;
+    /* Teks Putih */
+
+    /* EFEK GLOW PUTIH (Sesuai request) */
+    /* Angka 0.8 di belakang itu tingkat terangnya (Makin tinggi makin silau) */
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.8), inset 0 0 10px rgba(255, 255, 255, 0.1) !important;
+    --tw-shadow-color: rgba(255, 255, 255, 0.8) !important;
+
+    transform: translateY(-5px) !important;
+    /* Efek Melayang Dikit */
+}
+
+/* SAAT DIPILIH (ACTIVE) -> PUTIH TOTAL */
+.genre-tag.selected,
+.genre-tag.active {
+    background-color: #ffffff !important;
+    /* Blok Putih Penuh */
+    color: #000000 !important;
+    /* Teks Hitam (biar terbaca) */
+    border-color: #ffffff !important;
+
+    /* Glow Putih Paling Terang */
+    box-shadow: 0 0 25px rgba(255, 255, 255, 1) !important;
+}
+
+/* PEMBERSIH WARNA CYAN/BIRU (Jaga-jaga kalau masih ada sisa) */
+.genre-tag:hover[class*="cyan"],
+.genre-tag.active[class*="cyan"] {
+    border-color: #ffffff !important;
+    color: #ffffff !important;
+    --tw-shadow-color: rgba(255, 255, 255, 0.8) !important;
+}
+
+@keyframes shine {
+    0% {
+        transform: translateX(-150%) skewX(-15deg);
+    }
+
+    100% {
+        transform: translateX(150%) skewX(-15deg);
+    }
+}
+
+.animate-shine {
+    animation: shine 1s;
+}
+
+/* --- FIX INPUT LOGIN (Anti Belang Gelap-Terang) --- */
+
+/* 1. Paksa latar belakang input tetap gelap saat Auto-fill */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+    /* Ubah #1a1a1a sesuai warna background input yang kamu mau */
+    -webkit-box-shadow: 0 0 0 30px #1a1a1a inset !important;
+
+    /* Paksa teks tetap putih */
+    -webkit-text-fill-color: white !important;
+
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+/* 2. Pastikan teks placeholder terlihat jelas (tidak terlalu gelap) */
+input::placeholder {
+    color: #888 !important;
+    opacity: 1;
+}
+
+/* --- [FIX] KUNCI WARNA JUDUL CARD GALLERY (BIAR GAK JADI PUTIH) --- */
+
+/* 1. Target Judul "Heroic Roster", "Digital Horizons", dll */
+.gaming-card h3.text-blue-400,
+.gaming-card:hover h3.text-blue-400,
+.gaming-card:active h3.text-blue-400,
+.group:hover h3.text-blue-400 {
+    color: #60a5fa !important;
+    /* KUNCI WARNA BIRU */
+}
+
+/* 2. Target Deskripsi di bawahnya (Biar gak jadi putih juga) */
+.gaming-card p.text-gray-300,
+.gaming-card:hover p.text-gray-300,
+.group:hover p.text-gray-300 {
+    color: #d1d5db !important;
+    /* KUNCI WARNA ABU-ABU */
+}
+/* === LOGIKA TOMBOL TITIK TIGA (CSS MANUAL) === */
+
+/* 1. Kondisi Default (Untuk HP/Tablet): Tombol SELALU MUNCUL agar bisa dipencet */
+.tombol-rahasia {
+    opacity: 1; 
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 2. Kondisi Khusus Laptop/PC (Layar Lebar): Tombol SEMBUNYI DULU */
+@media (min-width: 1024px) {
+    .tombol-rahasia {
+        opacity: 0; /* Hilang total */
+        transform: translateY(-10px); /* Geser sedikit ke atas */
+    }
+
+    /* Saat Kartu (.gaming-card) disentuh Mouse -> Tombol MUNCUL */
+    .gaming-card:hover .tombol-rahasia {
+        opacity: 1; /* Muncul jelas */
+        transform: translateY(0); /* Kembali ke posisi semula */
+    }
+}
+
+/* ========================================================
+   [13] TAMBAHAN UI STOREFRONT BARU
+   ======================================================== */
+
+/* --- A. HERO BANNER (GAMBAR PROMOSI RAKSASA) --- */
+.neon-border {
+    /* Garis pinggir dan cahaya putih halus */
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.2), inset 0 0 10px rgba(255, 255, 255, 0.1) !important;
+    border-color: rgba(255, 255, 255, 0.4) !important;
+}
+
+.hero-gradient {
+    /* Gradasi hitam agar teks di atas gambar terbaca jelas */
+    background: linear-gradient(90deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.7) 40%, rgba(0,0,0,0) 100%) !important;
+}
+
+/* --- B. SCROLLBAR HORIZONTAL (BIAR BERSIH) --- */
+/* Menyembunyikan scrollbar bawah tapi tetap bisa digeser pakai jari/mouse */
+.hide-scrollbar::-webkit-scrollbar {
+    display: none !important;
+}
+.hide-scrollbar {
+    -ms-overflow-style: none !important;
+    scrollbar-width: none !important;
+}
+
+/* --- C. FIX WARNA TOMBOL CAROUSEL (TITIK DI BAWAH BANNER) --- */
+.carousel-dot {
+    background-color: rgba(255, 255, 255, 0.3) !important; /* Titik abu-abu */
+}
+.carousel-dot.bg-white {
+    background-color: #ffffff !important; /* Titik yang aktif jadi Putih */
+    box-shadow: 0 0 15px rgba(255, 255, 255, 1) !important;
+}
+/* ========================================== */
+/* 1. KONDISI DEFAULT (DIAM): Redup / Abu-abu */
+/* ========================================== */
+button.platform-card.pill-btn {
+    color: #888888 !important; 
+}
+button.platform-card.pill-btn svg {
+    filter: none !important; 
+}
+
+/* Ikon PC (Garis Abu) */
+button[data-device="pc"] svg path,
+button[data-device="pc"] svg rect,
+button[data-device="pc"] svg line,
+button[data-device="pc"] svg circle {
+    fill: transparent !important;
+    stroke: #888888 !important;
+    stroke-width: 2 !important;
+    transition: stroke 0.3s ease !important;
+}
+
+/* Ikon PlayStation & Xbox Baru (Blok Abu) */
+button[data-device="playstation"] svg path,
+button[data-device="xbox"] svg path {
+    fill: #888888 !important;
+    stroke: none !important;
+    transition: fill 0.3s ease !important;
+}
+
+/* ========================================== */
+/* 2. KONDISI HOVER & AKTIF: Nyala Putih      */
+/* ========================================== */
+button.platform-card.pill-btn:hover,
+button.platform-card.pill-btn.selected,
+button.platform-card.pill-btn.active {
+    color: #ffffff !important;
+    border-color: #ffffff !important;
+}
+
+button.platform-card.pill-btn:hover svg,
+button.platform-card.pill-btn.selected svg,
+button.platform-card.pill-btn.active svg {
+    filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.8)) !important;
+}
+
+/* Ikon PC berubah garis putih */
+button[data-device="pc"]:hover svg path,
+button[data-device="pc"]:hover svg rect,
+button[data-device="pc"]:hover svg line,
+button[data-device="pc"]:hover svg circle,
+button[data-device="pc"].selected svg path,
+button[data-device="pc"].selected svg rect,
+button[data-device="pc"].selected svg line,
+button[data-device="pc"].selected svg circle {
+    stroke: #ffffff !important;
+}
+
+/* Ikon PlayStation & Xbox Baru berubah blok putih */
+button[data-device="playstation"]:hover svg path,
+button[data-device="playstation"].selected svg path,
+button[data-device="playstation"].active svg path,
+button[data-device="xbox"]:hover svg path,
+button[data-device="xbox"].selected svg path,
+button[data-device="xbox"].active svg path {
+    fill: #ffffff !important;
+}
