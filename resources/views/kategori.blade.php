@@ -15,6 +15,7 @@
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Kategori Game - GameVault</title>
     
     <link rel="icon" type="image/png" href="{{ asset('assets/Logo Game Vault 1.png') }}">
@@ -385,8 +386,8 @@
 
                 {{-- Tombol Lihat Semua --}}
                 @if(count($genreBoxes) > 6)
-                <div class="mt-8 flex justify-center">
-                    <button onclick="toggleGenreBoxes(this)" class="text-[11px] font-bold text-[#a78bfa] hover:text-white transition-colors uppercase tracking-widest bg-purple-500/10 px-6 py-3 rounded-lg border border-purple-500/20 hover:bg-purple-500/20">
+                <div class="mt-8 text-center w-full block">
+                    <button onclick="toggleGenreBoxes(this)" class="inline-block mx-auto text-[11px] font-bold text-[#a78bfa] hover:text-white transition-colors uppercase tracking-widest bg-purple-500/10 px-6 py-3 rounded-lg border border-purple-500/20 hover:bg-purple-500/20">
                         Lihat Semua Kategori
                     </button>
                 </div>
@@ -936,6 +937,124 @@
             window.location.href = '/kategori?reset=1';
         }
 
+        // --- TOAST NOTIFICATION ---
+        function showToast(message) {
+            const toastContent = document.getElementById('successModalContent');
+            toastContent.innerHTML = `
+                <div class="w-16 h-16 bg-green-500/10 text-green-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-green-500/20">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-black text-white mb-2">${message}</h3>
+                <button onclick="closeSuccessModal()" class="mt-6 w-full py-3 bg-[#1A1D24] hover:bg-white/5 border border-white/10 text-white font-bold rounded-xl transition-all">Tutup</button>
+            `;
+            document.getElementById('successModal').classList.remove('hidden');
+            setTimeout(() => {
+                document.getElementById('successModal').classList.remove('opacity-0');
+            }, 10);
+            
+            // Auto close after 3 seconds
+            setTimeout(closeSuccessModal, 3000);
+        }
+
+        function hideToast() {
+            closeSuccessModal();
+        }
+
+        // --- FUNGSI TAMBAH KERANJANG (DENGAN SPINNER) ---
+        window.tambahKeranjangCerdas = function(gameId, isBuyNow, btnElement) {
+            let isLoggedIn = @json(Auth::check());
+            if (isLoggedIn === 'false' || isLoggedIn === false) {
+                document.getElementById('loginModal').classList.remove('hidden');
+                return;
+            }
+
+            const originalContent = btnElement.innerHTML;
+
+            // Ubah tombol jadi Spinner Loading Bawaan Tailwind
+            btnElement.innerHTML = `<svg class="animate-spin h-5 w-5 text-white mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`;
+            btnElement.disabled = true;
+
+            // OPTIMISTIC UPDATE
+            let originalCount = 0;
+            if (!isBuyNow) {
+                let badge = document.getElementById('globalCartBadge');
+                originalCount = badge && badge.innerText && badge.style.display !== 'none' ? parseInt(badge.innerText) : 0;
+                if (isNaN(originalCount)) originalCount = 0;
+                let newCount = originalCount + 1;
+
+                if (badge) {
+                    badge.innerText = newCount;
+                    badge.style.setProperty('display', 'flex', 'important');
+                }
+                localStorage.setItem('cartCount', newCount);
+            }
+
+            fetch('/cart_process', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        game_id: gameId
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (isBuyNow) {
+                        window.location.href = '/cart';
+                    } else {
+                        btnElement.innerHTML = originalContent;
+                        btnElement.disabled = false;
+                        if (data.status === 'success') {
+                            showToast('Game berhasil masuk ke keranjangmu!');
+                            if (data.cart_count !== undefined) {
+                            localStorage.setItem('cartCount', data.cart_count);
+                            let badge = document.getElementById('globalCartBadge');
+                            if (badge) {
+                                badge.innerText = data.cart_count;
+                                badge.style.setProperty('display', data.cart_count > 0 ? 'flex' : 'none', 'important');
+                            }
+                            
+                            // NEW: Update cart_cache for label syncing
+                            let cc = JSON.parse(localStorage.getItem('cart_cache')) || [];
+                            if (!cc.includes(gameId)) cc.push(gameId);
+                            localStorage.setItem('cart_cache', JSON.stringify(cc));
+                            
+                            if (window.syncGameCardLabels) window.syncGameCardLabels();
+                            }
+                        } else {
+                            showToast(data.message || 'Gagal menambahkan ke keranjang');
+                            if (!isBuyNow) {
+                                let badge = document.getElementById('globalCartBadge');
+                                if (badge) {
+                                    badge.innerText = originalCount;
+                                    badge.style.setProperty('display', originalCount > 0 ? 'flex' : 'none', 'important');
+                                }
+                                localStorage.setItem('cartCount', originalCount);
+                            }
+                        }
+                    }
+                })
+                .catch(err => {
+                    console.error('Error:', err);
+                    btnElement.innerHTML = originalContent;
+                    btnElement.disabled = false;
+                    showToast('Terjadi kesalahan jaringan.');
+                    if (!isBuyNow) {
+                        let badge = document.getElementById('globalCartBadge');
+                        if (badge) {
+                            badge.innerText = originalCount;
+                            badge.style.setProperty('display', originalCount > 0 ? 'flex' : 'none', 'important');
+                        }
+                        localStorage.setItem('cartCount', originalCount);
+                    }
+                });
+        };
+
         // Live Search di Sidebar untuk filter daftar game yang tampil
         function filterByTitle() {
             const query = document.getElementById('kategoriSearchInput').value.toLowerCase();
@@ -1106,6 +1225,22 @@
         }
     });
 </script>
+
+    <div id="loginModal" class="hidden fixed inset-0 z-[250] flex items-center justify-center bg-black/90 backdrop-blur-md transition-opacity duration-300">
+        <div class="bg-[#12151C] p-8 rounded-2xl border border-white/10 shadow-[0_0_50px_rgba(124,58,237,0.1)] w-full max-w-md relative">
+            <button onclick="document.getElementById('loginModal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+            <h2 class="text-2xl font-black text-white text-center mb-2 tracking-wide uppercase">AKSES DITOLAK</h2>
+            <p class="text-gray-400 text-center text-sm mb-6">Kamu harus login terlebih dahulu.</p>
+            <a href="{{ url('/login') }}" class="block w-full text-center text-white font-bold py-3 rounded-xl transition-all" style="background-color: #7C3AED !important;">LOGIN SEKARANG</a>
+        </div>
+    </div>
+
+    {{-- Modal Konfirmasi Sukses (Menggantikan Toast) --}}
+    @include('components.success-modal')
 
 </body>
 
