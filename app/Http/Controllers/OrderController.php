@@ -57,7 +57,7 @@ class OrderController extends Controller
             }
         }
         
-        $mediaPathStr = count($mediaPaths) > 0 ? implode(',', $mediaPaths) : null;
+        $mediaPathStr = count($mediaPaths) > 0 ? implode('|', $mediaPaths) : null;
 
         // Cek apakah user sudah pernah review game ini
         $cek_review = Review::where('user_id', Auth::id())
@@ -68,15 +68,15 @@ class OrderController extends Controller
             // Kalau sudah pernah, update yang lama
             $cek_review->rating = $request->rating;
             $cek_review->komentar = $request->komentar;
-            
             $existingMedia = $request->input('existing_media', '');
-            $keptMediaArray = $existingMedia ? explode(',', $existingMedia) : [];
+            $keptMediaArray = $existingMedia ? explode('|', $existingMedia) : [];
             
             // Hapus file fisik untuk media yang tidak dipertahankan
-            $oldMediaArray = $cek_review->media ? explode(',', $cek_review->media) : [];
+            $oldMediaArray = $cek_review->media ? explode('|', $cek_review->media) : [];
             $deletedMedia = array_diff($oldMediaArray, $keptMediaArray);
             foreach ($deletedMedia as $delPath) {
-                $filePath = public_path($delPath);
+                $realPath = preg_replace('/#t=.*$/', '', trim($delPath));
+                $filePath = public_path($realPath);
                 if (file_exists($filePath) && !is_dir($filePath)) {
                     unlink($filePath);
                 }
@@ -84,7 +84,7 @@ class OrderController extends Controller
 
             // Gabungkan media yang lama (yang dipertahankan) dengan media baru
             $finalMedia = array_merge($keptMediaArray, $mediaPaths);
-            $cek_review->media = count($finalMedia) > 0 ? implode(',', $finalMedia) : null;
+            $cek_review->media = count($finalMedia) > 0 ? implode('|', $finalMedia) : null;
             $cek_review->save();
         } else {
             // Kalau belum, buat baru
@@ -95,7 +95,7 @@ class OrderController extends Controller
             $review->komentar = $request->komentar;
             
             $finalMedia = $mediaPaths; // Hanya media baru jika review baru
-            $review->media = count($finalMedia) > 0 ? implode(',', $finalMedia) : null;
+            $review->media = count($finalMedia) > 0 ? implode('|', $finalMedia) : null;
             $review->save();
         }
 
@@ -111,10 +111,11 @@ class OrderController extends Controller
         if ($review) {
             // Hapus file fisik jika ada media
             if ($review->media) {
-                $medias = explode(',', $review->media);
+                $medias = explode('|', $review->media);
                 foreach ($medias as $media) {
-                    $filePath = public_path($media);
-                    if (file_exists($filePath)) {
+                    $realPath = preg_replace('/#t=.*$/', '', trim($media));
+                    $filePath = public_path($realPath);
+                    if (file_exists($filePath) && !is_dir($filePath)) {
                         unlink($filePath);
                     }
                 }

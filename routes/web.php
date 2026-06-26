@@ -5,10 +5,17 @@ use App\Http\Controllers\{
     HomeController, AuthController, CartController,
     WishlistController, CheckoutController,
     OrderController, ProfilController, SearchController,
-    AdminController, InvoiceController
+    AdminController, InvoiceController, RefundController
 };
 
 // Halaman Utama dan Pencarian
+Route::get('/stream-media', function(Illuminate\Http\Request $request) {
+    $path = $request->query('path');
+    if (!$path || !file_exists(public_path($path))) {
+        abort(404);
+    }
+    return response()->file(public_path($path));
+});
 Route::get('/', [HomeController::class, 'index']);
 Route::get('/search', [SearchController::class, 'index']);
 Route::get('/search/autocomplete', [SearchController::class, 'autocomplete']);
@@ -210,6 +217,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/review/delete', [OrderController::class, 'hapusReview']); 
     
     Route::get('/invoice/download/{id}', [InvoiceController::class, 'download']);
+
+    // Rute Refund
+    Route::post('/refund/request', [RefundController::class, 'requestRefund']);
+    Route::post('/refund/cancel', [RefundController::class, 'cancelRefund']);
 });
 
 // Route untuk Fitur Ganti Email Akun
@@ -231,6 +242,10 @@ Route::middleware(['auth', \App\Http\Middleware\IsAdmin::class])->prefix('admin'
     Route::get('/transaksi', [AdminController::class, 'indexTransaksi']); 
     Route::get('/transaksi/cetak', [AdminController::class, 'cetakLaporan']); 
     Route::get('/users', [AdminController::class, 'indexUsers']); 
+    
+    // Rute Admin Refund
+    Route::get('/refunds', [RefundController::class, 'indexAdmin']);
+    Route::post('/refunds/{id}/process', [RefundController::class, 'process']);
 });
 
 // Halaman dedicated untuk fitur Keranjang Belanja Baru
@@ -248,63 +263,15 @@ Route::get('/cart', function () {
     }
 
     $games = \App\Models\Game::with('reviews')->inRandomOrder($seed)->get();
-    return view('cart', compact('games'));
+    $populer_games = \App\Models\Game::with('reviews')->withAvg('reviews', 'rating')->orderBy('reviews_avg_rating', 'desc')->limit(10)->get();
+    return view('cart', compact('games', 'populer_games'));
 });
 
 // Halaman dedicated untuk fitur Wishlist
 Route::get('/wishlist', function () {
     $games = \App\Models\Game::with('reviews')->get();
-    return view('wishlist', compact('games'));
-});
-
-Route::get('/game/{id}', function ($id) {
-    $game = \App\Models\Game::with('reviews.user')->findOrFail($id);
-    return view('detail', compact('game'));
-});
-
-// Route untuk Fitur Ganti Email Akun
-Route::get('/profil/ganti-email', [App\Http\Controllers\ProfilController::class, 'showGantiEmailForm'])->middleware('auth');
-Route::post('/profil/ganti-email/kirim', [App\Http\Controllers\ProfilController::class, 'kirimOtpEmail'])->middleware('auth');
-Route::get('/profil/ganti-email/verifikasi', [App\Http\Controllers\ProfilController::class, 'showVerifikasiOtpForm'])->middleware('auth');
-Route::post('/profil/ganti-email/proses', [App\Http\Controllers\ProfilController::class, 'prosesGantiEmail'])->middleware('auth');
-
-// Kelompok Rute Khusus Admin Panel
-Route::middleware(['auth', \App\Http\Middleware\IsAdmin::class])->prefix('admin')->group(function () {
-    Route::get('/dashboard', [AdminController::class, 'dashboard']);
-    Route::get('/games', [AdminController::class, 'indexGames']); 
-    Route::get('/games/hapus/{id}', [AdminController::class, 'hapusGame']); 
-    Route::get('/games/hapus-galeri/{id}', [AdminController::class, 'hapusGaleri']); 
-    Route::get('/games/tambah', [AdminController::class, 'tambahGame']); 
-    Route::post('/games/simpan', [AdminController::class, 'simpanGame']); 
-    Route::get('/games/edit/{id}', [AdminController::class, 'editGame']); 
-    Route::post('/games/update/{id}', [AdminController::class, 'updateGame']); 
-    Route::get('/transaksi', [AdminController::class, 'indexTransaksi']); 
-    Route::get('/transaksi/cetak', [AdminController::class, 'cetakLaporan']); 
-    Route::get('/users', [AdminController::class, 'indexUsers']); 
-});
-
-// Halaman dedicated untuk fitur Keranjang Belanja Baru
-Route::get('/cart', function () {
-    $hasKeepSeed = isset($_COOKIE['keep_seed']);
-    $seed = session('game_seed_cart');
-    if (!$hasKeepSeed || !$seed) {
-        $seed = rand(1, 999999);
-        session(['game_seed_cart' => $seed]);
-    }
-    
-    if ($hasKeepSeed) {
-        setcookie('keep_seed', '', time() - 3600, '/');
-        unset($_COOKIE['keep_seed']);
-    }
-
-    $games = \App\Models\Game::with('reviews')->inRandomOrder($seed)->get();
-    return view('cart', compact('games'));
-});
-
-// Halaman dedicated untuk fitur Wishlist
-Route::get('/wishlist', function () {
-    $games = \App\Models\Game::with('reviews')->get();
-    return view('wishlist', compact('games'));
+    $populer_games = \App\Models\Game::with('reviews')->withAvg('reviews', 'rating')->orderBy('reviews_avg_rating', 'desc')->limit(10)->get();
+    return view('wishlist', compact('games', 'populer_games'));
 });
 
 // Detail halaman game berdasarkan ID

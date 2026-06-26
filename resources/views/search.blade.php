@@ -38,24 +38,14 @@
             <a href="/" class="flex-shrink-0 flex items-center group">
                 <img src="{{ asset('assets/Logo Game Vault 1.png') }}" alt="GameVault Logo" class="h-6 sm:h-7 lg:h-8 w-auto drop-shadow-[0_0_15px_rgba(124,58,237,0.8)] group-hover:drop-shadow-[0_0_25px_rgba(124,58,237,1)] transition-all duration-300">
             </a>
-            <form action="/search" method="GET" class="w-full max-w-sm relative hidden md:block">
-                <input type="text" name="q" value="{{ request('q') }}" placeholder="Cari game favorit kamu..."
-                    class="w-full bg-[#12151C] border border-white/10 text-sm text-white px-4 py-2.5 rounded-lg focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/30 transition-all placeholder-gray-500 pl-10 cursor-text">
-                <svg class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 transition-colors pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                </svg>
-            </form>
+                            @include('components.search-bar')
         </div>
 
         {{-- Tengah: Navigasi --}}
         <nav class="flex-1 hidden lg:flex items-center justify-center gap-8 xl:gap-10 text-sm font-medium h-full">
             <a href="/" class="{{ request()->is('/') ? 'text-purple-400 border-purple-500' : 'text-gray-400 border-transparent hover:text-white' }} border-b-2 pb-7 pt-7 transition-all">Beranda</a>
             <a href="/kategori" class="{{ request()->is('kategori') ? 'text-purple-400 border-purple-500' : 'text-gray-400 border-transparent hover:text-white' }} border-b-2 pb-7 pt-7 transition-all">Kategori</a>
-            @if(request()->is('/') || request()->is('kategori'))
-                <a href="#" id="nav-bantuan" onclick="toggleBantuan(event)" class="text-gray-400 hover:text-white border-b-2 border-transparent pb-7 pt-7 transition-all relative">Bantuan</a>
-            @else
-                <a href="/bantuan" class="{{ request()->is('bantuan') ? 'text-purple-400 border-purple-500' : 'text-gray-400 border-transparent hover:text-white' }} border-b-2 pb-7 pt-7 transition-all">Bantuan</a>
-            @endif
+            <a href="/bantuan" class="{{ request()->is('bantuan') ? 'text-purple-400 border-purple-500' : 'text-gray-400 border-transparent hover:text-white' }} border-b-2 pb-7 pt-7 transition-all">Bantuan</a>
         </nav>
 
         {{-- Kanan: Ikon & Login --}}
@@ -71,18 +61,19 @@
                     <span id="globalCartBadge" class="absolute -top-1.5 -right-1.5 w-4 h-4 text-white text-[9px] font-bold items-center justify-center rounded-full" style="background-color: #7C3AED !important; display: {{ $globalCartCount > 0 ? 'flex' : 'none' }} !important;">{{ $globalCartCount }}</span>
                     <script>
                         window.syncCartBadge = function(e) {
-                            
-                            {
-                                let isLoggedIn = @json(Auth::check());
-                                if (!isLoggedIn) return;
-                                let cachedCount = parseInt(localStorage.getItem('cartCount')) || 0;
-                                let badgeInit = document.getElementById('globalCartBadge');
-                                if (badgeInit) {
-                                    badgeInit.innerText = cachedCount;
-                                    badgeInit.style.setProperty('display', cachedCount > 0 ? 'flex' : 'none', 'important');
-                                }
-                            }
-                        };
+    let isLoggedIn = @json(Auth::check());
+    if (!isLoggedIn) return;
+    if (localStorage.getItem('cartCount') === null) {
+        if (typeof updateGlobalCartBadge === 'function') updateGlobalCartBadge();
+        return;
+    }
+    let cachedCount = parseInt(localStorage.getItem('cartCount')) || 0;
+    let badgeInit = document.getElementById('globalCartBadge');
+    if (badgeInit) {
+        badgeInit.innerText = cachedCount;
+        badgeInit.style.setProperty('display', cachedCount > 0 ? 'flex' : 'none', 'important');
+    }
+};
                         window.addEventListener('pageshow', window.syncCartBadge);
                     </script>
                 </a>
@@ -99,26 +90,30 @@
                 </a>
                 <script>
                     window.syncWishlistBadge = function(e) {
-                        
-                        {
-                            let isLoggedIn = @json(Auth::check());
-                            if (!isLoggedIn) return;
-                            let cachedWishlist = localStorage.getItem('wishlist');
-                            let wishlist = JSON.parse(cachedWishlist) || [];
-                            let cachedCount = wishlist.length;
-                            let badges = document.querySelectorAll('.globalWishlistBadge, #globalWishlistBadge');
-                            badges.forEach(badgeInit => {
-                                badgeInit.innerText = cachedCount;
-                                badgeInit.style.setProperty('display', cachedCount > 0 ? 'flex' : 'none', 'important');
-                            });
-                        }
-                    };
+    let isLoggedIn = @json(Auth::check());
+    if (!isLoggedIn) return;
+    let cachedWishlist = localStorage.getItem('wishlist');
+    if (cachedWishlist === null) {
+        if (typeof updateGlobalWishlistBadge === 'function') updateGlobalWishlistBadge();
+        return;
+    }
+    let wishlist = JSON.parse(cachedWishlist) || [];
+    let cachedCount = wishlist.length;
+    let badges = document.querySelectorAll('.globalWishlistBadge, #globalWishlistBadge');
+    badges.forEach(badgeInit => {
+        badgeInit.innerText = cachedCount;
+        badgeInit.style.setProperty('display', cachedCount > 0 ? 'flex' : 'none', 'important');
+    });
+};
                     window.addEventListener('pageshow', window.syncWishlistBadge);
                 </script>
 
             <div class="h-6 w-px bg-white/10 mx-1 hidden sm:block"></div>
             @auth
             <div class="relative cursor-pointer" onclick="toggleSettings()" id="settingsBtn">
+                @if(isset($pendingRefundsCount) && $pendingRefundsCount > 0)
+                    <div class="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full border-2 border-[#12151C] z-10" style="margin-top: -2px; margin-right: -2px;"></div>
+                @endif
                 <div class="flex items-center gap-3 border border-white/5 py-1.5 pl-1.5 pr-4 rounded-full" style="background-color: #12151C !important;">
                     @if(Auth::user()->foto)
                     <img src="{{ asset('assets/profile/' . Auth::user()->foto) }}" class="w-8 h-8 rounded-full object-cover border border-purple-500/50">
@@ -210,6 +205,9 @@
                             {{-- Badge Platform (Hitam) --}}
                             <span class="text-[9px] font-bold text-gray-400 border border-white/10 px-2 py-1 rounded bg-[#0A0C10] uppercase tracking-wider">
                                 {{ $game->platform ?? 'PC' }}
+                                @if($game->console_edition)
+                                <span class="ml-2 px-1.5 py-0.5 text-[10px] text-pink-500 bg-pink-500/10 rounded border border-pink-500/20">{{ $game->console_edition }}</span>
+                                @endif
                             </span>
                             
                             {{-- Badge Genre (Ungu) --}}
@@ -396,5 +394,6 @@
     }
 </script>
 
+@include('components.toast-notification')
 </body>
 </html>

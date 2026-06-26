@@ -13,7 +13,7 @@
                     <div class="space-y-2">
                         <a href="/" class="block text-sm {{ request()->is('/') ? 'text-[#7C3AED] font-bold pointer-events-none drop-shadow-[0_0_10px_rgba(124,58,237,0.5)]' : 'text-gray-500 hover:text-white' }} transition-all">Beranda</a>
                         <a href="/kategori" class="block text-sm {{ request()->is('kategori') ? 'text-[#7C3AED] font-bold pointer-events-none drop-shadow-[0_0_10px_rgba(124,58,237,0.5)]' : 'text-gray-500 hover:text-white' }} transition-all">Kategori Game</a>
-                        <a href="#" onclick="window.scrollTo({top:0,behavior:'smooth'}); setTimeout(function(){ if(!bantuanActive) toggleBantuan(event); }, 400); return false;" class="block text-sm text-gray-500 hover:text-white transition-all cursor-pointer">Bantuan & FAQ</a>
+                        <a href="/bantuan" class="block text-sm text-gray-500 hover:text-white transition-all">Bantuan & FAQ</a>
                     </div>
                 </div>
                 <div>

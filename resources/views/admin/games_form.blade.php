@@ -75,7 +75,13 @@
             <a href="/admin/transaksi" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition-all text-sm font-medium">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg> Transaksi
             </a>
-            <a href="/admin/users" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition-all text-sm font-medium">
+                        <a href="/admin/refunds" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition-all text-sm font-medium">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg> Permintaan Refund
+                @if(isset($pendingRefundsCount) && $pendingRefundsCount > 0)
+                    <span class="ml-auto bg-red-500 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full">{{ $pendingRefundsCount }}</span>
+                @endif
+            </a>
+<a href="/admin/users" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition-all text-sm font-medium">
                 <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M15 7C15 8.65685 13.6569 10 12 10C10.3431 10 9 8.65685 9 7C9 5.34315 10.3431 4 12 4C13.6569 4 15 5.34315 15 7Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     <path d="M5 21C5 17.134 8.13401 14 12 14C15.866 14 19 17.134 19 21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -113,7 +119,7 @@
 
 
         {{-- Form --}}
-        <form action="{{ $game ? '/admin/games/update/'.$game->id : '/admin/games/simpan' }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ $game ? '/admin/games/update/'.$game->id : '/admin/games/simpan' }}" method="POST" enctype="multipart/form-data" id="game-form" onsubmit="showLoadingOverlay()">
             @csrf
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -125,20 +131,27 @@
                             <div class="w-1.5 h-6 bg-purple-500 rounded-full"></div>
                             <h2 class="text-white font-bold uppercase tracking-widest text-sm">Informasi Utama</h2>
                         </div>
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Nama Game <span class="text-red-500">*</span></label>
-                                <input type="text" name="name" value="{{ $game->name ?? '' }}" required
-                                       placeholder="Contoh: Cyberpunk 2077"
-                                       class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-600 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/30 transition-colors text-sm">
-                            </div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {{-- Kolom Kiri: Nama, Platform, Label, Genre, Harga --}}
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Nama Game <span class="text-red-500">*</span></label>
+                                    <input type="text" name="name" value="{{ $game->name ?? '' }}" required
+                                           placeholder="Contoh: Cyberpunk 2077"
+                                           class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-600 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/30 transition-colors text-sm">
+                                </div>
                                 <div>
                                     <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Platform <span class="text-red-500">*</span></label>
-                                    <input type="text" name="platform" value="{{ $game->platform ?? '' }}" required
-                                           placeholder="PC, PlayStation, Xbox"
-                                           class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-600 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/30 transition-colors text-sm">
+                                    <input type="text" name="platform" value="{{ $game->platform ?? '' }}" required 
+                                           class="w-full bg-white/5 border border-white/10 text-white text-sm rounded-xl focus:ring-pink-500 focus:border-pink-500 block p-3 transition-colors placeholder-gray-500"
+                                           placeholder="Contoh: PC, PlayStation, Xbox">
                                     <p class="text-gray-600 text-xs mt-1">Pisahkan dengan koma jika lebih dari satu</p>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Label Spesial / Edisi (Opsional)</label>
+                                    <input type="text" name="console_edition" value="{{ $game->console_edition ?? '' }}" 
+                                           class="w-full bg-white/5 border border-white/10 text-white text-sm rounded-xl focus:ring-pink-500 focus:border-pink-500 block p-3 transition-colors placeholder-gray-500"
+                                           placeholder="Contoh: PS4, PS5, Remastered">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Genre <span class="text-red-500">*</span></label>
@@ -146,13 +159,34 @@
                                            placeholder="Action, RPG, Strategy..."
                                            class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-600 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/30 transition-colors text-sm">
                                 </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Harga (Rp) <span class="text-red-500">*</span></label>
+                                    <div class="relative">
+                                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm font-bold">Rp</span>
+                                        <input type="text" name="price" id="price-input" value="{{ $game ? number_format($game->price, 0, ',', '.') : '0' }}" required
+                                               class="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-600 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/30 transition-colors text-sm">
+                                    </div>
+                                </div>
                             </div>
-                            <div>
-                                <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Harga (Rp) <span class="text-red-500">*</span></label>
-                                <div class="relative">
-                                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm font-bold">Rp</span>
-                                    <input type="number" name="price" value="{{ $game->price ?? '0' }}" required min="0"
-                                           class="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-600 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/30 transition-colors text-sm">
+
+                            {{-- Kolom Kanan: Developer, Publisher, Rilis --}}
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Developer</label>
+                                    <input type="text" name="developer" value="{{ $game->developer ?? '' }}"
+                                           class="w-full bg-white/5 border border-white/10 text-white text-sm rounded-xl focus:ring-pink-500 focus:border-pink-500 block p-3 transition-colors placeholder-gray-500"
+                                           placeholder="Contoh: Naughty Dog">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Publisher</label>
+                                    <input type="text" name="publisher" value="{{ $game->publisher ?? '' }}"
+                                           class="w-full bg-white/5 border border-white/10 text-white text-sm rounded-xl focus:ring-pink-500 focus:border-pink-500 block p-3 transition-colors placeholder-gray-500"
+                                           placeholder="Contoh: Sony Interactive">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Tanggal Rilis</label>
+                                    <input type="date" name="release_date" value="{{ $game->release_date ? \Carbon\Carbon::parse($game->release_date)->format('Y-m-d') : '' }}"
+                                           class="w-full bg-white/5 border border-white/10 text-white text-sm rounded-xl focus:ring-pink-500 focus:border-pink-500 block p-3 transition-colors placeholder-gray-500 [color-scheme:dark]">
                                 </div>
                             </div>
                         </div>
@@ -172,7 +206,7 @@
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Deskripsi Lengkap</label>
-                                <textarea name="description" rows="5"
+                                <textarea name="description" id="editor-description" rows="5"
                                           placeholder="Deskripsi lengkap tentang gameplay, fitur, dan cerita game..."
                                           class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-600 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/30 transition-colors text-sm resize-none">{{ $game->description ?? '' }}</textarea>
                             </div>
@@ -182,13 +216,13 @@
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Spesifikasi Minimum</label>
-                                        <textarea name="sys_req_min" rows="5"
+                                        <textarea name="sys_req_min" id="editor-sys-min" rows="5"
                                                   placeholder="OS: Windows 10 64-bit&#10;CPU: Intel Core i3 / Ryzen 3&#10;RAM: 8 GB&#10;GPU: GTX 1050 / RX 560&#10;Storage: 50 GB"
                                                   class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-gray-300 placeholder-gray-600 focus:outline-none focus:border-purple-500 transition-colors text-sm resize-none leading-relaxed">{{ $game->sys_req_min ?? '' }}</textarea>
                                     </div>
                                     <div>
                                         <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Spesifikasi Recommended</label>
-                                        <textarea name="sys_req_rec" rows="5"
+                                        <textarea name="sys_req_rec" id="editor-sys-rec" rows="5"
                                                   placeholder="OS: Windows 11 64-bit&#10;CPU: Intel Core i5 / Ryzen 5&#10;RAM: 16 GB&#10;GPU: RTX 3060 / RX 6600&#10;Storage: 50 GB SSD"
                                                   class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-gray-300 placeholder-gray-600 focus:outline-none focus:border-purple-500 transition-colors text-sm resize-none leading-relaxed">{{ $game->sys_req_rec ?? '' }}</textarea>
                                     </div>
@@ -253,6 +287,8 @@
                                     $videoType = '';
                                     $ytStart = '';
                                     $ytEnd = '';
+                                    $fileStart = '';
+                                    $fileEnd = '';
                                     if ($game && $game->galleries) {
                                         $video = $game->galleries->where('type', 'video')->first();
                                         if ($video) {
@@ -262,9 +298,13 @@
                                                 parse_str(parse_url($videoUrl, PHP_URL_QUERY) ?? '', $query);
                                                 $ytStart = $query['start'] ?? '';
                                                 $ytEnd = $query['end'] ?? '';
-                                                // Bersihkan start & end dari URL utama untuk ditampilkan
                                                 $videoUrl = preg_replace('/([?&])(start|end)=[^&]+(&|$)/', '$1', $videoUrl);
                                                 $videoUrl = rtrim($videoUrl, '?&');
+                                            } else if ($videoType == 'file' && str_contains($videoUrl, '#t=')) {
+                                                preg_match('/#t=([\d.]+),?([\d.]*)/', $videoUrl, $matches);
+                                                $fileStart = $matches[1] ?? '';
+                                                $fileEnd = $matches[2] ?? '';
+                                                $videoUrl = preg_replace('/#.*$/', '', $videoUrl);
                                             }
                                         }
                                     }
@@ -272,7 +312,7 @@
 
                                 @if($videoUrl && $videoType == 'file')
                                     <div class="mb-3 relative w-full aspect-video rounded-xl overflow-hidden border border-white/10 bg-black group">
-                                        <video src="{{ asset('assets/galleries/' . $videoUrl) }}" controls class="w-full h-full object-contain"></video>
+                                        <video src="{{ asset('assets/galleries/' . $videoUrl) . ($fileStart || $fileEnd ? '#t=' . ($fileStart ?: 0) . ',' . ($fileEnd ?: '') : '') }}" controls class="w-full h-full object-contain"></video>
                                         <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                             <label class="flex items-center gap-2 px-3 py-1.5 bg-red-500/90 hover:bg-red-600 text-white text-xs font-bold rounded-lg cursor-pointer shadow-md backdrop-blur-sm transition-colors">
                                                 <input type="checkbox" name="remove_video" value="1" class="rounded bg-red-900 border-red-500 text-white focus:ring-red-500">
@@ -286,14 +326,31 @@
                                 <div class="space-y-4">
                                     <div>
                                         <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Pilih File dari Komputer</label>
+                                        
+                                        {{-- PREVIEW VIDEO BARU --}}
+                                        <div id="new-video-preview-container" class="mb-3 relative w-full aspect-video rounded-xl overflow-hidden border border-pink-500/50 bg-black hidden">
+                                            <div class="absolute top-2 left-2 z-10 bg-pink-500 text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-lg tracking-widest uppercase">Video Baru</div>
+                                            <video id="new-video-preview" src="" controls class="w-full h-full object-contain"></video>
+                                        </div>
+
                                         <div class="relative">
                                             <input type="hidden" name="video_cuts" id="videoCutsInput" value="{}">
                                             <input type="file" name="gallery_video_file" id="video-file-input" accept="video/mp4,video/webm,video/ogg"
                                                    class="w-full text-sm text-gray-400 bg-white/5 border border-white/10 rounded-xl px-3 py-2 cursor-pointer focus:outline-none focus:border-pink-500 transition-colors"
                                                    onchange="handleAdminVideoSelect(this)">
-                                            <button type="button" class="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-gray-500 hover:text-white" onclick="document.getElementById('video-file-input').value=''; document.getElementById('gallery-video-url').disabled = false; document.getElementById('videoCutsInput').value = '{}';" title="Batal pilih file">
+                                            <button type="button" class="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-gray-500 hover:text-white" onclick="document.getElementById('video-file-input').value=''; document.getElementById('gallery-video-url').disabled = false; document.getElementById('videoCutsInput').value = '{}'; document.getElementById('file_video_start').value = ''; document.getElementById('file_video_end').value = ''; document.getElementById('new-video-preview-container').classList.add('hidden'); document.getElementById('new-video-preview').src = '';" title="Batal pilih file">
                                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                                             </button>
+                                        </div>
+                                        <div class="flex gap-4 mt-3">
+                                            <div class="flex-1">
+                                                <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Mulai (Detik)</label>
+                                                <input type="number" name="file_video_start" id="file_video_start" value="{{ $fileStart }}" placeholder="0" min="0" step="0.1" class="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-pink-500">
+                                            </div>
+                                            <div class="flex-1">
+                                                <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Selesai (Detik)</label>
+                                                <input type="number" name="file_video_end" id="file_video_end" value="{{ $fileEnd }}" placeholder="Kosongkan jika sampai habis" min="0" step="0.1" class="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-pink-500">
+                                            </div>
                                         </div>
                                     </div>
                                     
@@ -823,8 +880,18 @@
                 if (file.type.startsWith('video/')) {
                     trimmerVideo = document.getElementById('trimmerVideo');
                     const fileURL = URL.createObjectURL(file);
-                    trimmerVideo.src = fileURL;
                     
+                    // Set trimmer source
+                    trimmerVideo.src = fileURL;
+
+                    // Tampilkan preview langsung di form Admin
+                    let newPreviewContainer = document.getElementById('new-video-preview-container');
+                    let newPreviewVideo = document.getElementById('new-video-preview');
+                    if (newPreviewContainer && newPreviewVideo) {
+                        newPreviewContainer.classList.remove('hidden');
+                        newPreviewVideo.src = fileURL;
+                    }
+
                     trimmerVideo.onloadedmetadata = function() {
                         let duration = trimmerVideo.duration;
                         trimStartInput.max = duration;
@@ -859,9 +926,23 @@
             if (start > 0 || end < duration) {
                 videoCutsData['admin_video'] = { start: start, end: end };
                 document.getElementById('videoCutsInput').value = JSON.stringify(videoCutsData);
+                if (document.getElementById('file_video_start')) document.getElementById('file_video_start').value = start.toFixed(1);
+                if (document.getElementById('file_video_end')) document.getElementById('file_video_end').value = end.toFixed(1);
             } else {
                 document.getElementById('videoCutsInput').value = "{}";
             }
+            
+            document.getElementById('videoTrimmerModal').classList.add('hidden');
+            if (trimmerVideo) {
+                trimmerVideo.pause();
+                trimmerVideo.src = "";
+            }
+        }
+
+        function cancelTrim() {
+            document.getElementById('videoCutsInput').value = "{}";
+            if (document.getElementById('file_video_start')) document.getElementById('file_video_start').value = '';
+            if (document.getElementById('file_video_end')) document.getElementById('file_video_end').value = '';
             
             document.getElementById('videoTrimmerModal').classList.add('hidden');
             if (trimmerVideo) {
@@ -902,6 +983,104 @@
                 }
             }
         }
+
+        document.getElementById('image-upload').addEventListener('change', function(e) {
+            if (e.target.files && e.target.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('preview-image').src = e.target.result;
+                    document.getElementById('preview-container').classList.remove('hidden');
+                    document.getElementById('upload-prompt').classList.add('hidden');
+                }
+                reader.readAsDataURL(e.target.files[0]);
+            }
+        });
+
+        document.getElementById('remove-image').addEventListener('click', function(e) {
+            e.stopPropagation();
+            document.getElementById('image-upload').value = '';
+            document.getElementById('preview-container').classList.add('hidden');
+            document.getElementById('upload-prompt').classList.remove('hidden');
+            // If editing, might need to handle removing existing image
+        });
+
+        const priceInput = document.getElementById('price-input');
+        if (priceInput) {
+            priceInput.addEventListener('input', function(e) {
+                let val = this.value.replace(/[^0-9]/g, '');
+                if (val !== '') {
+                    this.value = parseInt(val, 10).toLocaleString('id-ID');
+                } else {
+                    this.value = '';
+                }
+            });
+        }
+    </script>
+
+    @include('components.loading-overlay')
+    @include('components.success-modal')
+    @include('components.toast-notification')
+
+    <style>
+    /* CKEditor 5 Dark Theme Overrides */
+    .ck.ck-editor__main>.ck-editor__editable {
+        background: #12151C !important;
+        color: white !important;
+        border-color: rgba(255,255,255,0.1) !important;
+        border-radius: 0 0 0.75rem 0.75rem !important;
+        min-height: 150px;
+    }
+    .ck.ck-toolbar {
+        background: #0A0C10 !important;
+        border: 1px solid rgba(255,255,255,0.1) !important;
+        border-radius: 0.75rem 0.75rem 0 0 !important;
+    }
+    .ck.ck-button, .ck.ck-dropdown__button {
+        color: #ccc !important;
+    }
+    .ck.ck-button:hover {
+        background: rgba(124, 58, 237, 0.2) !important;
+        color: white !important;
+    }
+    .ck.ck-button.ck-on {
+        background: rgba(124, 58, 237, 0.5) !important;
+        color: white !important;
+    }
+    .ck-reset_all :not(.ck-reset_all-excluded *), .ck.ck-reset_all {
+        color: #ccc !important;
+    }
+    .ck.ck-list {
+        background: #0A0C10 !important;
+    }
+    .ck.ck-list__item .ck-button:hover {
+        background: rgba(124, 58, 237, 0.2) !important;
+    }
+    </style>
+
+    <script src="{{ asset('ckeditor/ckeditor.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const editorConfig = {
+                toolbar: [
+                    'heading', '|',
+                    'bold', 'italic', '|',
+                    'bulletedList', 'numberedList', '|',
+                    'undo', 'redo'
+                ]
+            };
+
+            ClassicEditor
+                .create( document.querySelector( '#editor-description' ), editorConfig )
+                .catch( error => { console.error( error ); } );
+
+            ClassicEditor
+                .create( document.querySelector( '#editor-sys-min' ), editorConfig )
+                .catch( error => { console.error( error ); } );
+
+            ClassicEditor
+                .create( document.querySelector( '#editor-sys-rec' ), editorConfig )
+                .catch( error => { console.error( error ); } );
+        });
     </script>
 </body>
 </html>

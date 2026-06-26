@@ -2,16 +2,6 @@
 <html>
 
 <head>
-    <script>
-        (function() {
-            let currentUserId = "{{ Auth::check() ? Auth::id() : 'null' }}";
-            if (localStorage.getItem('lastUserId') !== currentUserId) {
-                localStorage.removeItem('cartCount');
-                localStorage.removeItem('wishlist');
-                localStorage.setItem('lastUserId', currentUserId);
-            }
-        })();
-    </script>
 
     <style>
         body {

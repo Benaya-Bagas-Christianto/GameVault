@@ -14,6 +14,25 @@ use Illuminate\Support\Facades\DB;
 class AdminController extends Controller
 {
     /**
+     * Memformat string agar kapitalisasinya seragam (Misal: action -> Action, ps5 -> PS5)
+     */
+    private function formatGameText($text) {
+        if (!$text) return null;
+        $words = array_map('trim', explode(',', $text));
+        $acronyms = ['pc', 'ps3', 'ps4', 'ps5', 'rpg', 'fps', 'tps', 'mmo', 'mmorpg', 'vr'];
+        
+        foreach($words as &$w) {
+            $lower = strtolower($w);
+            if (in_array($lower, $acronyms)) {
+                $w = strtoupper($lower);
+            } else {
+                $w = ucwords($lower);
+            }
+        }
+        return implode(', ', $words);
+    }
+
+    /**
      * Menampilkan Dashboard Statistik
      */
     public function dashboard() {
@@ -123,9 +142,13 @@ class AdminController extends Controller
     public function simpanGame(Request $request) {
         $game = new Game();
         $game->name = $request->name;
-        $game->platform = $request->platform;
-        $game->genre = strtolower($request->genre);
-        $game->price = $request->price;
+        $game->platform = $this->formatGameText($request->platform);
+        $game->console_edition = $this->formatGameText($request->console_edition);
+        $game->genre = $this->formatGameText($request->genre);
+        $game->developer = $request->developer;
+        $game->publisher = $request->publisher;
+        $game->release_date = $request->release_date;
+        $game->price = str_replace('.', '', $request->price);
         $game->synopsis = $request->synopsis;
         $game->description = $request->description;
         // Menyimpan 2 Spesifikasi Sistem
@@ -164,10 +187,10 @@ class AdminController extends Controller
             $nama_file = time() . "_video_" . uniqid() . "." . $file->getClientOriginalExtension();
             $file->move(public_path('assets/galleries'), $nama_file);
             
-            $videoCuts = json_decode($request->input('video_cuts', '{}'), true);
-            if (isset($videoCuts['admin_video'])) {
-                $start = $videoCuts['admin_video']['start'] ?? 0;
-                $end = $videoCuts['admin_video']['end'] ?? 0;
+            $start = $request->input('file_video_start', 0);
+            $end = $request->input('file_video_end', 0);
+
+            if ($start > 0 || $end > 0) {
                 $nama_file .= "#t={$start},{$end}";
             }
 
@@ -215,9 +238,13 @@ class AdminController extends Controller
     public function updateGame(Request $request, $id) {
         $game = Game::find($id);
         $game->name = $request->name;
-        $game->platform = $request->platform;
-        $game->genre = strtolower($request->genre);
-        $game->price = $request->price;
+        $game->platform = $this->formatGameText($request->platform);
+        $game->console_edition = $this->formatGameText($request->console_edition);
+        $game->genre = $this->formatGameText($request->genre);
+        $game->developer = $request->developer;
+        $game->publisher = $request->publisher;
+        $game->release_date = $request->release_date;
+        $game->price = str_replace('.', '', $request->price);
         $game->synopsis = $request->synopsis;
         $game->description = $request->description;
         // Mengupdate 2 Spesifikasi Sistem
@@ -297,10 +324,12 @@ class AdminController extends Controller
             $nama_file = time() . "_video_" . uniqid() . "." . $file->getClientOriginalExtension();
             $file->move(public_path('assets/galleries'), $nama_file);
             
-            $videoCuts = json_decode($request->input('video_cuts', '{}'), true);
-            if (isset($videoCuts['admin_video'])) {
-                $start = $videoCuts['admin_video']['start'] ?? 0;
-                $end = $videoCuts['admin_video']['end'] ?? 0;
+            $start = $request->input('file_video_start', 0);
+            $end = $request->input('file_video_end', 0);
+
+            if ($start > 0 || $end > 0) {
+                $start = $start ?: 0;
+                $end = $end ?: 0;
                 $nama_file .= "#t={$start},{$end}";
             }
 
@@ -339,7 +368,7 @@ class AdminController extends Controller
         } else if ($request->has('remove_video') && $request->remove_video == '1') {
             $oldVideo = GameGallery::where('game_id', $game->id)->where('type', 'video')->first();
             if ($oldVideo && !str_contains($oldVideo->path, 'youtube.com') && !str_contains($oldVideo->path, 'youtu.be')) {
-                $oldPath = public_path('assets/galleries/' . $oldVideo->path);
+                $oldPath = public_path('assets/galleries/' . preg_replace('/#.*$/', '', $oldVideo->path));
                 if (File::exists($oldPath)) { File::delete($oldPath); }
             }
             GameGallery::where('game_id', $game->id)->where('type', 'video')->delete();
@@ -347,6 +376,20 @@ class AdminController extends Controller
             $oldVideo = GameGallery::where('game_id', $game->id)->where('type', 'video')->first();
             if ($oldVideo && (str_contains($oldVideo->path, 'youtube.com') || str_contains($oldVideo->path, 'youtu.be'))) {
                 $oldVideo->delete();
+            } else if ($oldVideo && !str_contains($oldVideo->path, 'youtube.com') && !str_contains($oldVideo->path, 'youtu.be')) {
+                // Update cut time for existing local video
+                $basePath = preg_replace('/#.*$/', '', $oldVideo->path);
+                $start = $request->input('file_video_start', 0);
+                $end = $request->input('file_video_end', 0);
+                if ($start > 0 || $end > 0) {
+                    $start = $start ?: 0;
+                    $end = $end ?: 0;
+                    $basePath .= "#t={$start},{$end}";
+                }
+                if ($oldVideo->path !== $basePath) {
+                    $oldVideo->path = $basePath;
+                    $oldVideo->save();
+                }
             }
         }
 
@@ -382,7 +425,7 @@ class AdminController extends Controller
      * TRANSAKSI: Menampilkan Riwayat Transaksi
      */
     public function indexTransaksi() {
-        $transaksi = Transaksi::join('tb_users', 'tb_transaksi.user_id', '=', 'tb_users.id')
+        $transaksi = \App\Models\Transaksi::with('details')->join('tb_users', 'tb_transaksi.user_id', '=', 'tb_users.id')
             ->select('tb_transaksi.*', 'tb_users.name as nama_pembeli', 'tb_users.username')
             ->orderBy('tb_transaksi.id', 'desc')
             ->get();

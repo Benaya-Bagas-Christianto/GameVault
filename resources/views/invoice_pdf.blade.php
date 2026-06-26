@@ -1,16 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <script>
-        (function() {
-            let currentUserId = "{{ Auth::check() ? Auth::id() : 'null' }}";
-            if (localStorage.getItem('lastUserId') !== currentUserId) {
-                localStorage.removeItem('cartCount');
-                localStorage.removeItem('wishlist');
-                localStorage.setItem('lastUserId', currentUserId);
-            }
-        })();
-    </script>
 
     <meta charset="UTF-8">
     <title>Invoice GameVault #{{ $trx->id }}</title>
@@ -117,5 +107,6 @@
         Lisensi digital Anda telah diaktifkan di akun Anda. Dokumen ini sah dan diterbitkan secara otomatis oleh sistem.
     </div>
 
+@include('components.toast-notification')
 </body>
 </html>

@@ -84,7 +84,12 @@
                             <img src="{{ asset($item->game->image) }}" class="w-full h-full object-cover">
                         </div>
                         <div class="flex-1">
-                            <h4 class="text-white font-bold text-lg">{{ $item->game->name }}</h4>
+                            <h4 class="text-white font-bold text-lg flex items-center gap-2">
+                                {{ $item->game->name }}
+                                @if($item->is_refunded)
+                                    <span class="px-2 py-0.5 bg-red-500/20 text-red-500 border border-red-500/30 rounded text-[10px] font-black uppercase tracking-wider">Direfund</span>
+                                @endif
+                            </h4>
                             <p class="text-gray-500 text-sm mt-1 mb-3">
                                 Activation Key:
                                 <span class="font-mono text-cyan-300 bg-cyan-900/20 px-2 py-0.5 rounded ml-1">
@@ -97,7 +102,12 @@
                         </div>
                         <div class="text-right hidden sm:block">
                             <span class="text-gray-400 text-sm">Harga Beli</span><br>
-                            <span class="text-white font-medium">Rp {{ number_format($item->harga_saat_beli, 0, ',', '.') }}</span>
+                            @if($item->is_refunded)
+                                <span class="text-gray-600 font-medium line-through">Rp {{ number_format($item->harga_saat_beli, 0, ',', '.') }}</span><br>
+                                <span class="text-red-500 font-bold text-xs uppercase">Dikembalikan</span>
+                            @else
+                                <span class="text-white font-medium">Rp {{ number_format($item->harga_saat_beli, 0, ',', '.') }}</span>
+                            @endif
                         </div>
                     </div>
                     @endforeach
@@ -160,5 +170,6 @@
 
     <script>
 </script>
+@include('components.toast-notification')
 </body>
 </html>

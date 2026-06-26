@@ -150,5 +150,6 @@
                 </div>
             </div>
         </div>
-    </body>
+    @include('components.toast-notification')
+</body>
 </html>

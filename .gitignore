@@ -16,3 +16,6 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
+/public/assets/galleries/*
+/public/assets/reviews/*
+/public/assets/profile/*

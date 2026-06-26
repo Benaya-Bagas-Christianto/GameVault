@@ -69,5 +69,6 @@
             </form>
         </div>
     </main>
+@include('components.toast-notification')
 </body>
 </html>

@@ -11,9 +11,12 @@ class ProfilController extends Controller
 {
     public function index()
     {
-        $total_owned = \App\Models\Transaksi::where('user_id', auth()->user()->id)
-                            ->where('status', 'Success')
-                            ->count();
+        $total_owned = DB::table('tb_detail_transaksi')
+                        ->join('tb_transaksi', 'tb_detail_transaksi.transaksi_id', '=', 'tb_transaksi.id')
+                        ->where('tb_transaksi.user_id', auth()->user()->id)
+                        ->where('tb_transaksi.status', 'Success')
+                        ->where('tb_detail_transaksi.is_refunded', false)
+                        ->count();
 
         return view('profil', compact('total_owned'));
     }
@@ -111,9 +114,11 @@ class ProfilController extends Controller
         $games = DB::table('tb_detail_transaksi')
                     ->join('tb_transaksi', 'tb_detail_transaksi.transaksi_id', '=', 'tb_transaksi.id')
                     ->join('tb_games', 'tb_detail_transaksi.game_id', '=', 'tb_games.id')
+                    ->leftJoin('refunds', 'tb_detail_transaksi.id', '=', 'refunds.detail_transaksi_id')
                     ->where('tb_transaksi.user_id', auth()->user()->id)
                     ->where('tb_transaksi.status', 'Success')
-                    ->select('tb_games.*', 'tb_transaksi.created_at as tgl_beli')
+                    ->where('tb_detail_transaksi.is_refunded', false)
+                    ->select('tb_games.*', 'tb_transaksi.created_at as tgl_beli', 'tb_detail_transaksi.id as detail_id', 'refunds.status as refund_status')
                     ->orderBy('tb_transaksi.created_at', 'desc') // Urutkan dari yang terbaru dibeli
                     ->get();
 
@@ -134,8 +139,16 @@ class ProfilController extends Controller
             $gamesList = DB::table('tb_detail_transaksi')
                         ->join('tb_games', 'tb_detail_transaksi.game_id', '=', 'tb_games.id')
                         ->where('tb_detail_transaksi.transaksi_id', $t->id)
-                        ->select('tb_games.name', 'tb_games.image')
+                        ->select('tb_games.name', 'tb_games.image', 'tb_detail_transaksi.is_refunded', 'tb_detail_transaksi.harga_saat_beli')
                         ->get();
+
+            $t->has_refund = $gamesList->where('is_refunded', true)->count() > 0;
+            $t->total_items = $gamesList->count();
+            $t->refund_state = ($t->has_refund) ? (($gamesList->where('is_refunded', true)->count() == $t->total_items) ? 'Full' : 'Partial') : 'None';
+
+            if ($t->has_refund) {
+                $t->total_bayar = $gamesList->where('is_refunded', false)->sum('harga_saat_beli');
+            }
 
             if ($gamesList->count() > 0) {
                 $t->game_image = $gamesList->first()->image;
@@ -158,6 +171,7 @@ class ProfilController extends Controller
                         ->join('tb_transaksi', 'tb_detail_transaksi.transaksi_id', '=', 'tb_transaksi.id')
                         ->where('tb_transaksi.user_id', auth()->user()->id)
                         ->where('tb_transaksi.status', 'Success')
+                        ->where('tb_detail_transaksi.is_refunded', false)
                         ->count();
 
         // 4. Kirim ke view
@@ -303,8 +317,18 @@ class ProfilController extends Controller
         $details = DB::table('tb_detail_transaksi')
             ->join('tb_games', 'tb_detail_transaksi.game_id', '=', 'tb_games.id')
             ->where('tb_detail_transaksi.transaksi_id', $id)
-            ->select('tb_games.name', 'tb_games.image', 'tb_detail_transaksi.harga_saat_beli')
+            ->select('tb_games.name', 'tb_games.image', 'tb_detail_transaksi.harga_saat_beli', 'tb_detail_transaksi.is_refunded')
             ->get();
+
+        $totalItems = count($details);
+        $refundedItems = $details->where('is_refunded', 1)->count();
+        $refund_state = 'None';
+        $adjusted_total = $trx->total_bayar;
+        
+        if ($refundedItems > 0) {
+            $refund_state = ($refundedItems == $totalItems) ? 'Full' : 'Partial';
+            $adjusted_total = $details->where('is_refunded', false)->sum('harga_saat_beli');
+        }
 
         return response()->json([
             'status' => 'success',
@@ -312,7 +336,8 @@ class ProfilController extends Controller
                 'id' => $trx->id,
                 'created_at' => $trx->created_at->format('d M Y, H:i'),
                 'status' => $trx->status,
-                'total_bayar' => $trx->total_bayar,
+                'total_bayar' => $adjusted_total,
+                'refund_state' => $refund_state
             ],
             'items' => $details
         ]);

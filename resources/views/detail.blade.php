@@ -53,24 +53,14 @@
             <a href="/" class="flex-shrink-0 flex items-center group">
                 <img src="{{ asset('assets/Logo Game Vault 1.png') }}" alt="GameVault Logo" class="h-6 sm:h-7 lg:h-8 w-auto drop-shadow-[0_0_15px_rgba(124,58,237,0.8)] group-hover:drop-shadow-[0_0_25px_rgba(124,58,237,1)] transition-all duration-300">
             </a>
-            <form action="/search" method="GET" class="w-full max-w-sm relative hidden md:block">
-                <input type="text" name="q" value="{{ request('q') }}" placeholder="Cari game favorit kamu..."
-                    class="w-full bg-[#12151C] border border-white/10 text-sm text-white px-4 py-2.5 rounded-lg focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/30 transition-all placeholder-gray-500 pl-10 cursor-text">
-                <svg class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 transition-colors pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                </svg>
-            </form>
+                            @include('components.search-bar')
         </div>
 
         {{-- Tengah: Navigasi --}}
         <nav class="flex-1 hidden lg:flex items-center justify-center gap-8 xl:gap-10 text-sm font-medium h-full">
             <a href="/" class="{{ request()->is('/') ? 'text-purple-400 border-purple-500' : 'text-gray-400 border-transparent hover:text-white' }} border-b-2 pb-7 pt-7 transition-all">Beranda</a>
             <a href="/kategori" class="{{ request()->is('kategori') ? 'text-purple-400 border-purple-500' : 'text-gray-400 border-transparent hover:text-white' }} border-b-2 pb-7 pt-7 transition-all">Kategori</a>
-            @if(request()->is('/') || request()->is('kategori'))
-                <a href="#" id="nav-bantuan" onclick="toggleBantuan(event)" class="text-gray-400 hover:text-white border-b-2 border-transparent pb-7 pt-7 transition-all relative">Bantuan</a>
-            @else
-                <a href="/bantuan" class="{{ request()->is('bantuan') ? 'text-purple-400 border-purple-500' : 'text-gray-400 border-transparent hover:text-white' }} border-b-2 pb-7 pt-7 transition-all">Bantuan</a>
-            @endif
+            <a href="/bantuan" class="{{ request()->is('bantuan') ? 'text-purple-400 border-purple-500' : 'text-gray-400 border-transparent hover:text-white' }} border-b-2 pb-7 pt-7 transition-all">Bantuan</a>
         </nav>
 
         {{-- Kanan: Ikon & Login --}}
@@ -86,17 +76,19 @@
                     <span id="globalCartBadge" class="absolute -top-1.5 -right-1.5 w-4 h-4 text-white text-[9px] font-bold items-center justify-center rounded-full" style="background-color: #7C3AED !important; display: {{ $globalCartCount > 0 ? 'flex' : 'none' }} !important;">{{ $globalCartCount }}</span>
                     <script>
                         window.syncCartBadge = function(e) {
-                                                {
-                                let isLoggedIn = @json(Auth::check());
-                                if (!isLoggedIn) return;
-                                let cachedCount = parseInt(localStorage.getItem('cartCount')) || 0;
-                                let badgeInit = document.getElementById('globalCartBadge');
-                                if (badgeInit) {
-                                    badgeInit.innerText = cachedCount;
-                                    badgeInit.style.setProperty('display', cachedCount > 0 ? 'flex' : 'none', 'important');
-                                }
-                            }
-                        };
+    let isLoggedIn = @json(Auth::check());
+    if (!isLoggedIn) return;
+    if (localStorage.getItem('cartCount') === null) {
+        if (typeof updateGlobalCartBadge === 'function') updateGlobalCartBadge();
+        return;
+    }
+    let cachedCount = parseInt(localStorage.getItem('cartCount')) || 0;
+    let badgeInit = document.getElementById('globalCartBadge');
+    if (badgeInit) {
+        badgeInit.innerText = cachedCount;
+        badgeInit.style.setProperty('display', cachedCount > 0 ? 'flex' : 'none', 'important');
+    }
+};
                         window.addEventListener('pageshow', window.syncCartBadge);
                     </script>
                 </a>
@@ -113,25 +105,30 @@
                 </a>
                 <script>
                     window.syncWishlistBadge = function(e) {
-                                        {
-                            let isLoggedIn = @json(Auth::check());
-                            if (!isLoggedIn) return;
-                            let cachedWishlist = localStorage.getItem('wishlist');
-                            let wishlist = JSON.parse(cachedWishlist) || [];
-                            let cachedCount = wishlist.length;
-                            let badges = document.querySelectorAll('.globalWishlistBadge, #globalWishlistBadge');
-                            badges.forEach(badgeInit => {
-                                badgeInit.innerText = cachedCount;
-                                badgeInit.style.setProperty('display', cachedCount > 0 ? 'flex' : 'none', 'important');
-                            });
-                        }
-                    };
+    let isLoggedIn = @json(Auth::check());
+    if (!isLoggedIn) return;
+    let cachedWishlist = localStorage.getItem('wishlist');
+    if (cachedWishlist === null) {
+        if (typeof updateGlobalWishlistBadge === 'function') updateGlobalWishlistBadge();
+        return;
+    }
+    let wishlist = JSON.parse(cachedWishlist) || [];
+    let cachedCount = wishlist.length;
+    let badges = document.querySelectorAll('.globalWishlistBadge, #globalWishlistBadge');
+    badges.forEach(badgeInit => {
+        badgeInit.innerText = cachedCount;
+        badgeInit.style.setProperty('display', cachedCount > 0 ? 'flex' : 'none', 'important');
+    });
+};
                     window.addEventListener('pageshow', window.syncWishlistBadge);
                 </script>
 
             <div class="h-6 w-px bg-white/10 mx-1 hidden sm:block"></div>
             @auth
             <div class="relative cursor-pointer" onclick="toggleSettings()" id="settingsBtn">
+                @if(isset($pendingRefundsCount) && $pendingRefundsCount > 0)
+                    <div class="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full border-2 border-[#12151C] z-10" style="margin-top: -2px; margin-right: -2px;"></div>
+                @endif
                 <div class="flex items-center gap-3 border border-white/5 py-1.5 pl-1.5 pr-4 rounded-full" style="background-color: #12151C !important;">
                     @if(Auth::user()->foto)
                     <img src="{{ asset('assets/profile/' . Auth::user()->foto) }}" class="w-8 h-8 rounded-full object-cover border border-purple-500/50">
@@ -190,12 +187,17 @@
                             <img id="mainCoverImage" src="{{ asset('assets/' . $game->image) }}" onerror="this.src='/assets/no-image.jpg'" class="w-full aspect-[3/4] object-cover" style="transition: src 0.3s ease;">
                         </div>
                                         <div class="flex-1 flex flex-col justify-center w-full">
-                            <h1 class="text-4xl md:text-5xl lg:text-6xl font-black !text-white mb-4" style="font-family: serif; text-shadow: 2px 2px 10px rgba(0,0,0,0.9);">{{ $game->name }}</h1>
+                            <h1 class="text-4xl md:text-5xl lg:text-6xl font-black !text-white mb-4" style="text-shadow: 2px 2px 10px rgba(0,0,0,0.9);">{{ $game->name }}</h1>
                             <div class="flex flex-wrap items-center gap-3 mb-5">
                                 @foreach(explode(',', $game->genre) as $tag)
                                     <span class="text-gray-300 text-xs font-medium px-3 py-1.5 rounded-lg border border-white/10" style="background-color: #1A1D24 !important;">{{ trim($tag) }}</span>
                                 @endforeach
                                 <span class="text-gray-300 text-xs font-medium px-3 py-1.5 rounded-lg border border-white/10" style="background-color: #1A1D24 !important;">{{ $game->platform ?? 'PC' }}</span>
+                                @if($game->console_edition)
+                                    @foreach(explode(',', $game->console_edition) as $ce)
+                                        <span class="text-pink-400 text-xs font-medium px-3 py-1.5 rounded-lg border border-pink-500/20 bg-pink-500/10">{{ trim($ce) }}</span>
+                                    @endforeach
+                                @endif
                             </div>
 
                             <div class="flex items-center gap-4 mb-6">
@@ -281,7 +283,7 @@
                             <div class="border border-white/5 p-8 rounded-2xl" style="background-color: #12151C !important;">
                                 <h2 class="text-xl font-bold !text-white mb-6">Tentang Game</h2>
                                 <div class="text-gray-300 text-sm leading-relaxed whitespace-pre-line">
-                                    {{ $game->description ?? 'Tidak ada deskripsi rinci untuk game ini.' }}
+                                    {!! isset($game->description) ? (str_contains($game->description, '<') ? $game->description : nl2br(e($game->description))) : 'Tidak ada deskripsi rinci untuk game ini.' !!}
                                 </div>
                             </div>
 
@@ -313,8 +315,12 @@
                                         @if($youtubeId)
                                         <iframe class="absolute top-0 left-0 w-full h-full" src="https://www.youtube.com/embed/{{ $youtubeId }}{{ $ytQuery }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                                         @else
-                                        <video src="{{ asset('assets/galleries/' . $videoTrailer->path) }}" controls class="absolute top-0 left-0 w-full h-full object-contain"></video>
-                                        @endif
+                        @php
+                            $cleanTrailerPath = preg_replace('/#.*$/', '', $videoTrailer->path);
+                            $trailerHash = str_contains($videoTrailer->path, '#') ? '#' . explode('#', $videoTrailer->path)[1] : '';
+                        @endphp
+                        <video src="{{ url('/stream-media?path=assets/galleries/' . $cleanTrailerPath) }}{{ $trailerHash }}" controls class="absolute top-0 left-0 w-full h-full object-contain"></video>
+                    @endif
                                     </div>
                                 </div>
                                 @endif
@@ -368,10 +374,17 @@
                                         <p class="text-sm text-gray-300 leading-relaxed mb-4">{{ $rev->komentar }}</p>
                                                                         @if($rev->media)
                                             <div class="mt-3 flex flex-wrap gap-2">
-                                                @foreach(explode(',', $rev->media) as $mediaItem)
+                                                @php
+                                                    $mediaItems = explode('|', $rev->media);
+                                                @endphp
+                                                @foreach($mediaItems as $mediaItem)
                                                     <div class="w-max max-w-sm rounded-xl overflow-hidden border border-white/10">
-                                                        @if(\Illuminate\Support\Str::endsWith(strtolower(trim($mediaItem)), ['.mp4', '.webm', '.ogg', '.mov']))
-                                                            <video src="{{ asset(trim($mediaItem)) }}" controls class="w-full max-h-64 object-contain bg-black"></video>
+                                                        @php
+                                                            $cleanPath = preg_replace('/#.*$/', '', trim($mediaItem));
+                                                            $hashPart = str_contains($mediaItem, '#') ? '#' . explode('#', $mediaItem)[1] : '';
+                                                        @endphp
+                                                        @if(\Illuminate\Support\Str::endsWith(strtolower($cleanPath), ['.mp4', '.webm', '.ogg', '.mov']))
+                                                            <video src="{{ url('/stream-media?path=' . ltrim($cleanPath, '/')) }}{{ $hashPart }}" controls class="w-full max-h-64 object-contain bg-black"></video>
                                                         @else
                                                             <img src="{{ asset(trim($mediaItem)) }}" class="w-full max-h-64 object-cover cursor-pointer hover:opacity-90 transition-opacity" onclick="openLightbox(this.src)">
                                                         @endif
@@ -398,15 +411,15 @@
                             <div class="space-y-4">
                                 <div class="grid grid-cols-3 gap-2 border-b border-white/5 pb-3">
                                     <span class="text-gray-500 col-span-1">Developer</span>
-                                    <span class="!text-white font-medium col-span-2 text-right">GameVault Studio</span>
+                                    <span class="!text-white font-medium col-span-2 text-right">{{ $game->developer ?: 'N/A' }}</span>
                                 </div>
                                 <div class="grid grid-cols-3 gap-2 border-b border-white/5 pb-3">
                                     <span class="text-gray-500 col-span-1">Publisher</span>
-                                    <span class="!text-white font-medium col-span-2 text-right">GameVault Inc.</span>
+                                    <span class="!text-white font-medium col-span-2 text-right">{{ $game->publisher ?: 'N/A' }}</span>
                                 </div>
                                 <div class="grid grid-cols-3 gap-2 border-b border-white/5 pb-3">
                                     <span class="text-gray-500 col-span-1">Rilis</span>
-                                    <span class="!text-white font-medium col-span-2 text-right">{{ $game->created_at ? $game->created_at->format('d F Y') : 'Segera' }}</span>
+                                    <span class="!text-white font-medium col-span-2 text-right">{{ $game->release_date ? \Carbon\Carbon::parse($game->release_date)->format('d F Y') : 'TBA' }}</span>
                                 </div>
                                 <div class="grid grid-cols-3 gap-2 border-b border-white/5 pb-3">
                                     <span class="text-gray-500 col-span-1">Genre</span>
@@ -414,7 +427,11 @@
                                 </div>
                                 <div class="grid grid-cols-3 gap-2 border-b border-white/5 pb-3">
                                     <span class="text-gray-500 col-span-1">Platform</span>
-                                    <span class="!text-white font-medium col-span-2 text-right">{{ $game->platform }}</span>
+                                    <span class="!text-white font-medium col-span-2 text-right">{{ $game->platform }}
+                                        @if($game->console_edition)
+                                        <span class="text-pink-400">({{ $game->console_edition }})</span>
+                                        @endif
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -423,13 +440,13 @@
                             <div class="mb-6">
                                 <p class="font-bold mb-3 text-xs uppercase tracking-widest" style="color: #8B5CF6 !important;">Minimum</p>
                                 <div class="text-gray-300 text-xs leading-relaxed space-y-2 whitespace-pre-line border-l-2 border-white/10 pl-3">
-                                    {{ $game->sys_req_min ?? "OS: Windows 10 64-bit\nProcessor: Intel Core i5\nMemory: 8 GB RAM\nGraphics: GTX 1060" }}
+                                    {!! isset($game->sys_req_min) && !empty(trim($game->sys_req_min)) ? (str_contains($game->sys_req_min, '<') ? $game->sys_req_min : nl2br(e($game->sys_req_min))) : "OS: Windows 10 64-bit\nProcessor: Intel Core i5\nMemory: 8 GB RAM\nGraphics: GTX 1060" !!}
                                 </div>
                             </div>
                             <div>
                                 <p class="font-bold mb-3 text-xs uppercase tracking-widest" style="color: #8B5CF6 !important;">Recommended</p>
                                 <div class="text-gray-300 text-xs leading-relaxed space-y-2 whitespace-pre-line border-l-2 border-white/10 pl-3">
-                                    {{ $game->sys_req_rec ?? "OS: Windows 11 64-bit\nProcessor: Intel Core i7\nMemory: 16 GB RAM\nGraphics: RTX 3060" }}
+                                    {!! isset($game->sys_req_rec) && !empty(trim($game->sys_req_rec)) ? (str_contains($game->sys_req_rec, '<') ? $game->sys_req_rec : nl2br(e($game->sys_req_rec))) : "OS: Windows 11 64-bit\nProcessor: Intel Core i7\nMemory: 16 GB RAM\nGraphics: RTX 3060" !!}
                                 </div>
                             </div>
                         </div>
@@ -878,5 +895,6 @@ function openLightbox(src) {
         // FITUR: Tahan pengacakan game saat kembali dari halaman detail
         document.cookie = "keep_seed=1; path=/; max-age=3600"; // Valid selama 1 jam
     </script>
+@include('components.toast-notification')
 </body>
 </html>

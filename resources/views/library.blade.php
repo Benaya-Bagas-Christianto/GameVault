@@ -65,24 +65,14 @@
             <a href="/" class="flex-shrink-0 flex items-center group">
                 <img src="{{ asset('assets/Logo Game Vault 1.png') }}" alt="GameVault Logo" class="h-6 sm:h-7 lg:h-8 w-auto drop-shadow-[0_0_15px_rgba(124,58,237,0.8)] group-hover:drop-shadow-[0_0_25px_rgba(124,58,237,1)] transition-all duration-300">
             </a>
-            <form action="/search" method="GET" class="w-full max-w-sm relative hidden md:block">
-                <input type="text" name="q" value="{{ request('q') }}" placeholder="Cari game favorit kamu..."
-                    class="w-full bg-[#12151C] border border-white/10 text-sm text-white px-4 py-2.5 rounded-lg focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/30 transition-all placeholder-gray-500 pl-10 cursor-text">
-                <svg class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 transition-colors pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                </svg>
-            </form>
+                            @include('components.search-bar')
         </div>
 
         {{-- Tengah: Navigasi --}}
         <nav class="flex-1 hidden lg:flex items-center justify-center gap-8 xl:gap-10 text-sm font-medium h-full">
             <a href="/" class="{{ request()->is('/') ? 'text-purple-400 border-purple-500' : 'text-gray-400 border-transparent hover:text-white' }} border-b-2 pb-7 pt-7 transition-all">Beranda</a>
             <a href="/kategori" class="{{ request()->is('kategori') ? 'text-purple-400 border-purple-500' : 'text-gray-400 border-transparent hover:text-white' }} border-b-2 pb-7 pt-7 transition-all">Kategori</a>
-            @if(request()->is('/') || request()->is('kategori'))
-                <a href="#" id="nav-bantuan" onclick="toggleBantuan(event)" class="text-gray-400 hover:text-white border-b-2 border-transparent pb-7 pt-7 transition-all relative">Bantuan</a>
-            @else
-                <a href="/bantuan" class="{{ request()->is('bantuan') ? 'text-purple-400 border-purple-500' : 'text-gray-400 border-transparent hover:text-white' }} border-b-2 pb-7 pt-7 transition-all">Bantuan</a>
-            @endif
+            <a href="/bantuan" class="{{ request()->is('bantuan') ? 'text-purple-400 border-purple-500' : 'text-gray-400 border-transparent hover:text-white' }} border-b-2 pb-7 pt-7 transition-all">Bantuan</a>
         </nav>
 
         {{-- Kanan: Ikon & Login --}}
@@ -98,18 +88,19 @@
                 <span id="globalCartBadge" class="absolute -top-1.5 -right-1.5 w-4 h-4 text-white text-[9px] font-bold items-center justify-center rounded-full" style="background-color: #7C3AED !important; display: {{ $globalCartCount > 0 ? 'flex' : 'none' }} !important;">{{ $globalCartCount }}</span>
                 <script>
                         window.syncCartBadge = function(e) {
-                            
-                            {
-                                let isLoggedIn = @json(Auth::check());
-                                if (!isLoggedIn) return;
-                                let cachedCount = parseInt(localStorage.getItem('cartCount')) || 0;
-                                let badgeInit = document.getElementById('globalCartBadge');
-                                if (badgeInit) {
-                                    badgeInit.innerText = cachedCount;
-                                    badgeInit.style.setProperty('display', cachedCount > 0 ? 'flex' : 'none', 'important');
-                                }
-                            }
-                        };
+    let isLoggedIn = @json(Auth::check());
+    if (!isLoggedIn) return;
+    if (localStorage.getItem('cartCount') === null) {
+        if (typeof updateGlobalCartBadge === 'function') updateGlobalCartBadge();
+        return;
+    }
+    let cachedCount = parseInt(localStorage.getItem('cartCount')) || 0;
+    let badgeInit = document.getElementById('globalCartBadge');
+    if (badgeInit) {
+        badgeInit.innerText = cachedCount;
+        badgeInit.style.setProperty('display', cachedCount > 0 ? 'flex' : 'none', 'important');
+    }
+};
                         window.addEventListener('pageshow', window.syncCartBadge);
                     </script>
             </a>
@@ -126,26 +117,30 @@
             </a>
             <script>
                     window.syncWishlistBadge = function(e) {
-                        
-                        {
-                            let isLoggedIn = @json(Auth::check());
-                            if (!isLoggedIn) return;
-                            let cachedWishlist = localStorage.getItem('wishlist');
-                            let wishlist = JSON.parse(cachedWishlist) || [];
-                            let cachedCount = wishlist.length;
-                            let badges = document.querySelectorAll('.globalWishlistBadge, #globalWishlistBadge');
-                            badges.forEach(badgeInit => {
-                                badgeInit.innerText = cachedCount;
-                                badgeInit.style.setProperty('display', cachedCount > 0 ? 'flex' : 'none', 'important');
-                            });
-                        }
-                    };
+    let isLoggedIn = @json(Auth::check());
+    if (!isLoggedIn) return;
+    let cachedWishlist = localStorage.getItem('wishlist');
+    if (cachedWishlist === null) {
+        if (typeof updateGlobalWishlistBadge === 'function') updateGlobalWishlistBadge();
+        return;
+    }
+    let wishlist = JSON.parse(cachedWishlist) || [];
+    let cachedCount = wishlist.length;
+    let badges = document.querySelectorAll('.globalWishlistBadge, #globalWishlistBadge');
+    badges.forEach(badgeInit => {
+        badgeInit.innerText = cachedCount;
+        badgeInit.style.setProperty('display', cachedCount > 0 ? 'flex' : 'none', 'important');
+    });
+};
                     window.addEventListener('pageshow', window.syncWishlistBadge);
                 </script>
 
             <div class="h-6 w-px bg-white/10 mx-1 hidden sm:block"></div>
             @auth
             <div class="relative cursor-pointer" onclick="toggleSettings()" id="settingsBtn">
+                @if(isset($pendingRefundsCount) && $pendingRefundsCount > 0)
+                    <div class="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full border-2 border-[#12151C] z-10" style="margin-top: -2px; margin-right: -2px;"></div>
+                @endif
                 <div class="flex items-center gap-3 border border-white/5 py-1.5 pl-1.5 pr-4 rounded-full" style="background-color: #12151C !important;">
                     @if(Auth::user()->foto)
                     <img src="{{ asset('assets/profile/' . Auth::user()->foto) }}" class="w-8 h-8 rounded-full object-cover border border-purple-500/50">
@@ -170,11 +165,10 @@
         <aside class="w-[240px] flex-shrink-0 border-r border-[#1f1f1f] hidden lg:flex flex-col bg-[#0A0C10] p-6 space-y-2">
             <p class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 pl-4">Akun Saya</p>
             <a href="/profil" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-[#12151C] hover:text-white transition-all text-sm font-medium">
-                <svg class="w-5 h-5 fill-current" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g><g><path d="M80,71.2V74c0,3.3-2.7,6-6,6H26c-3.3,0-6-2.7-6-6v-2.8c0-7.3,8.5-11.7,16.5-15.2c0.3-0.1,0.5-0.2,0.8-0.4 c0.6-0.3,1.3-0.3,1.9,0.1C42.4,57.8,46.1,59,50,59c3.9,0,7.6-1.2,10.8-3.2c0.6-0.4,1.3-0.4,1.9-0.1c0.3,0.1,0.5,0.2,0.8,0.4 C71.5,59.5,80,63.9,80,71.2z"/></g><g><ellipse cx="50" cy="36.5" rx="14.9" ry="16.5"/></g></g></svg> Profil & Keamanan
+                <svg class="w-5 h-5 fill-current" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g><g><path d="M80,71.2V74c0,3.3-2.7,6-6,6H26c-3.3,0-6-2.7-6-6v-2.8c0-7.3,8.5-11.7,16.5-15.2c0.3-0.1,0.5-0.2,0.8-0.4 c0.6-0.3,1.3-0.3,1.9,0.1C42.4,57.8,46.1,59,50,59c3.9,0,7.6-1.2,10.8-3.2c0.6-0.4,1.3-0.4,1.9-0.1c0.3,0.1,0.5,0.2,0.8,0.4 C71.5,59.5,80,63.9,80,71.2z"/></g><g><ellipse cx="50" cy="36.5" rx="14.9" ry="16.5"/></g></g></svg> Profil
             </a>
             <a href="/library" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#7C3AED]/10 border border-[#7C3AED]/30 text-[#a78bfa] transition-all text-sm font-bold shadow-[0_0_15px_rgba(124,58,237,0.1)]">
                 <svg class="w-5 h-5 fill-current" viewBox="0 0 512.549 512.549" xmlns="http://www.w3.org/2000/svg"><g transform="translate(-1)"><g><g><path d="M214.609,213.605h-21.333v-21.333c0-11.782-9.551-21.333-21.333-21.333c-11.782,0-21.333,9.551-21.333,21.333v21.333 h-21.333c-11.782,0-21.333,9.551-21.333,21.333c0,11.782,9.551,21.333,21.333,21.333h21.333v21.333 c0,11.782,9.551,21.333,21.333,21.333c11.782,0,21.333-9.551,21.333-21.333v-21.333h21.333c11.782,0,21.333-9.551,21.333-21.333 C235.943,223.156,226.391,213.605,214.609,213.605z"/><path d="M500.924,269.309c-12.915-49.866-33.027-100.133-53.035-141.855c-0.273-1.775-1.598-7.188-2.052-8.96 c-1.151-4.496-2.174-7.968-3.373-11.107c-3.242-8.489-6.404-13.576-15.335-16.973l-62.11-23.598 c-12.051-4.584-25.525-2.901-36.12,4.506l-2.105,1.472l-1.696,1.93c-1.745,1.985-4.607,5.115-7.619,8.168 c-0.822,0.829-0.822,0.829-1.629,1.624c-0.394,0.386-0.773,0.751-1.132,1.091H200.334c-1.075-1.142-1.075-1.142-1.908-2.056 c-2.723-3.006-5.302-6.099-6.856-8.047l-1.925-2.413l-2.53-1.768c-10.596-7.408-24.07-9.09-36.128-4.503L88.895,90.411 c-8.969,3.412-12.121,8.51-15.348,17.028c-1.184,3.126-2.188,6.564-3.337,11.078c-0.4,1.572-1.694,6.865-1.941,7.831 c-19.259,38.796-41.47,92.992-54.698,143.469C-7.884,351.686-3.78,412.893,40.752,442.363c13.705,9.031,31.564,7.364,43.661-3.43 l73.894-66.253c6.541-5.872,14.782-9.057,23.284-9.057h152.832c8.502,0,16.743,3.185,23.274,9.048l73.866,66.228 c12.24,10.921,30.427,12.721,44.123,3.176C518.544,411.991,522.09,351.038,500.924,269.309z M455.757,403.285l-69.566-62.373 c-14.316-12.852-32.697-19.956-51.767-19.956H181.592c-19.07,0-37.45,7.104-51.777,19.965l-69.758,62.544 c-19.658-18.052-21.296-61.46-5.213-122.832c12.346-47.111,33.478-98.672,51.546-134.307c1.399-2.752,2.112-5.086,3.217-9.411 c0.319-1.249,1.62-6.572,1.952-7.876c0.16-0.629,0.314-1.22,0.461-1.772l50.992-19.374c1.186,1.381,2.463,2.836,3.793,4.303 c1.113,1.222,1.113,1.222,2.273,2.457c9.927,10.492,13.691,13.62,24.204,13.62h128c10.147,0,13.785-2.861,24.417-13.27 c1.094-1.079,1.094-1.079,2.155-2.148c1.719-1.742,3.365-3.468,4.858-5.073l51.321,19.499c0.151,0.56,0.308,1.159,0.471,1.797 c0.382,1.493,1.69,6.836,1.931,7.787c1.066,4.206,1.73,6.435,2.992,9.058c18.908,39.428,38.104,87.404,50.193,134.082 C475.42,341.016,474.252,384.613,455.757,403.285z"/><path d="M342.609,192.271c11.776,0,21.333-9.557,21.333-21.333s-9.557-21.333-21.333-21.333 c-11.776,0-21.333,9.557-21.333,21.333S330.833,192.271,342.609,192.271z"/><path d="M342.609,234.938c-11.776,0-21.333,9.557-21.333,21.333s9.557,21.333,21.333,21.333c11.776,0,21.333-9.557,21.333-21.333 S354.385,234.938,342.609,234.938z"/><path d="M299.943,192.271c-11.776,0-21.333,9.557-21.333,21.333s9.557,21.333,21.333,21.333s21.333-9.557,21.333-21.333 S311.719,192.271,299.943,192.271z"/><path d="M385.276,192.271c-11.776,0-21.333,9.557-21.333,21.333s9.557,21.333,21.333,21.333s21.333-9.557,21.333-21.333 S397.052,192.271,385.276,192.271z"/></g></g></g></svg> Library Game
-                <span class="ml-auto bg-[#7C3AED] text-white text-[10px] px-2 py-0.5 rounded-full">{{ $games->count() }}</span>
             </a>
             <a href="/orders" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-[#12151C] hover:text-white transition-all text-sm font-medium">
                 <svg class="w-5 h-5 stroke-current" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="6" width="18" height="13" rx="2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 10H20.5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 15H9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Riwayat Transaksi
@@ -255,13 +249,48 @@
                                 </button>
                                 {{-- Badge "Dimiliki" ala UI --}}
                                 <div class="absolute top-3 right-3 z-10 bg-gray-900/90 text-green-400 text-[10px] tracking-widest font-black px-3 py-1.5 rounded-md shadow-[0_0_15px_rgba(34,197,94,0.3)] border border-green-500/50 backdrop-blur-md uppercase">DIBELI</div>
-                                <img src="{{ asset('assets/' . $game->image) }}" onerror="this.src='/assets/no-image.jpg'" class="w-full h-full object-cover opacity-90 group-hover:scale-105 transition-transform duration-500">
+                                
+                                {{-- Label Platform / Console Edition --}}
+                                <div class="absolute bottom-3 left-3 flex gap-1 z-10 flex-wrap max-w-[80%]">
+                                    @if($game->console_edition)
+                                        <span class="text-[9px] text-white bg-black/80 px-2.5 py-1 rounded-md border border-white/20 font-bold shadow-lg uppercase backdrop-blur-sm">{{ $game->console_edition }}</span>
+                                    @endif
+                                    @if($game->platform)
+                                        <span class="text-[9px] text-gray-300 bg-black/80 px-2.5 py-1 rounded-md border border-white/10 font-bold shadow-lg uppercase backdrop-blur-sm">{{ $game->platform }}</span>
+                                    @endif
+                                </div>
+                                
+                                <a href="/game/{{ $game->id }}">
+                                    <img src="{{ asset('assets/' . $game->image) }}" onerror="this.src='/assets/no-image.jpg'" class="w-full h-full object-cover opacity-90 group-hover:scale-105 transition-transform duration-500">
+                                </a>
                             </div>
                             
                             {{-- Detail info game --}}
                             <div class="p-5 flex-1 flex flex-col">
-                                <h3 class="font-bold text-white text-base leading-tight mb-1 line-clamp-1">{{ $game->name }}</h3>
+                                <a href="/game/{{ $game->id }}" class="hover:text-[#a78bfa] transition-colors">
+                                    <h3 class="font-bold text-white text-base leading-tight mb-1 line-clamp-1" title="{{ $game->name }}">{{ $game->name }}</h3>
+                                </a>
                                 <p class="text-[10px] text-gray-500 mb-4 mt-1">Dibeli pada: {{ \Carbon\Carbon::parse($game->tgl_beli)->format('d M Y') }}</p>
+                                
+                                @if($game->refund_status === 'pending')
+                                    <div class="flex items-center gap-2 mb-3">
+                                        <div class="text-[10px] text-yellow-500 font-bold bg-yellow-500/10 py-1.5 px-3 rounded-lg w-max border border-yellow-500/20 uppercase tracking-wider">Refund Diproses</div>
+                                        <form action="/refund/cancel" method="POST" id="cancelRefundForm{{ $game->detail_id }}" class="m-0">
+                                            @csrf
+                                            <button type="button" onclick="bukaModalCancelRefund('{{ $game->detail_id }}', '{{ addslashes($game->name) }}')" class="text-[10px] text-gray-400 hover:text-white bg-[#1A1D24] hover:bg-red-500/20 hover:border-red-500/50 py-1.5 px-3 rounded-lg w-max border border-white/10 transition-all font-bold uppercase tracking-wider flex items-center gap-1" title="Batalkan Refund">
+                                                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg> Batal
+                                            </button>
+                                        </form>
+                                    </div>
+                                @elseif($game->refund_status === 'rejected')
+                                    <div class="text-[10px] text-red-500 font-bold mb-3 bg-red-500/10 py-1.5 px-3 rounded-lg w-max border border-red-500/20 uppercase tracking-wider">Refund Ditolak</div>
+                                @elseif(\Carbon\Carbon::parse($game->tgl_beli)->diffInDays(now()) <= 14 && empty($game->refund_status))
+                                    @if(isset($reviews[$game->id]))
+                                        <div class="text-[10px] text-gray-500 font-bold mb-3 bg-gray-500/10 py-1.5 px-3 rounded-lg w-max border border-gray-500/20 uppercase tracking-wider cursor-help" title="Tidak bisa refund karena game sudah diulas">Telah Diulas</div>
+                                    @else
+                                        <button onclick="bukaModalRefund('{{ $game->detail_id }}', '{{ addslashes($game->name) }}')" class="text-[10px] text-red-400 hover:text-white mb-3 bg-red-500/10 hover:bg-red-500 py-1.5 px-3 rounded-lg w-max border border-red-500/20 transition-all font-bold uppercase tracking-wider">Ajukan Refund</button>
+                                    @endif
+                                @endif
                                 
                                 {{-- Tombol Buka Lisensi (Action Realistis E-Commerce) --}}
                                 <button onclick="bukaLibraryDetail('{{ $game->id }}', '{{ addslashes($game->name) }}', '{{ asset('assets/' . $game->image) }}', '{{ strtoupper(substr(md5($game->id . auth()->user()->id . $game->tgl_beli), 0, 15)) }}')" class="mt-auto w-full flex items-center justify-center text-center text-xs font-bold bg-[#1A1D24] text-white border border-white/10 hover:border-[#7C3AED] hover:bg-[#7C3AED]/20 py-3 rounded-xl transition-all tracking-wide">
@@ -404,6 +433,89 @@
         </div>
     </div>
 
+    {{-- MODAL REFUND --}}
+    <div id="refundModal" class="hidden fixed inset-0 z-[60] flex items-center justify-center bg-black/90 backdrop-blur-md transition-opacity">
+        <div class="bg-[#0A0C10] rounded-2xl border border-red-500/30 shadow-[0_0_50px_rgba(239,68,68,0.2)] w-full max-w-lg overflow-hidden relative flex flex-col mx-4" onclick="event.stopPropagation()">
+            <div class="p-6 border-b border-white/10 flex justify-between items-center">
+                <h3 class="text-white font-bold flex items-center gap-2">
+                    <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Ajukan Refund
+                </h3>
+                <button type="button" onclick="tutupModalRefund()" class="text-gray-400 hover:text-white transition-colors">✕</button>
+            </div>
+            <form action="/refund/request" method="POST" class="flex flex-col">
+                @csrf
+                <input type="hidden" name="detail_transaksi_id" id="refundDetailId" value="">
+                
+                <div class="p-6 bg-[#12151C] flex flex-col gap-4">
+                    <div class="p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
+                        <p class="text-xs text-red-200 leading-relaxed">
+                            <strong>Perhatian:</strong> Pengajuan refund hanya dapat dilakukan jika pembelian belum melewati batas 14 hari. Jika disetujui, akses lisensi game ini akan ditarik dari akun Anda.
+                        </p>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Game yang di-Refund</label>
+                        <p id="refundGameName" class="text-white font-bold text-lg bg-[#050505] p-3 rounded-lg border border-white/5"></p>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Alasan Refund</label>
+                        <select name="alasan" id="alasanSelect" onchange="toggleAlasanLainnya(this.value)" required class="w-full bg-[#050505] border border-white/10 text-sm text-white px-4 py-3 rounded-xl focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500/30 transition-all appearance-none cursor-pointer">
+                            <option value="" disabled selected>-- Pilih Alasan --</option>
+                            <option value="Game tidak dapat dijalankan (Crash/Error)">Game tidak dapat dijalankan (Crash/Error)</option>
+                            <option value="Spesifikasi PC tidak memenuhi syarat">Spesifikasi PC tidak memenuhi syarat</option>
+                            <option value="Salah membeli game">Salah membeli game</option>
+                            <option value="Game tidak sesuai ekspektasi">Game tidak sesuai ekspektasi</option>
+                            <option value="Banyak bug / glitch">Banyak bug / glitch</option>
+                            <option value="Lainnya">Lainnya</option>
+                        </select>
+                        
+                        <div id="alasanLainnyaContainer" class="hidden mt-3">
+                            <textarea name="alasan_lainnya" id="alasanLainnyaInput" rows="3" placeholder="Jelaskan alasan Anda secara singkat..." class="w-full bg-[#050505] border border-white/10 text-sm text-white px-4 py-3 rounded-xl focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500/30 transition-all resize-none"></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="p-6 border-t border-white/10 flex justify-end gap-3 bg-[#0A0C10]">
+                    <button type="button" onclick="tutupModalRefund()" class="px-5 py-2.5 rounded-xl text-gray-400 hover:text-white font-medium transition-colors text-sm">Batal</button>
+                    <button type="submit" class="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold transition-colors text-sm shadow-lg shadow-red-500/20">Kirim Pengajuan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {{-- MODAL BATALKAN REFUND --}}
+    <div id="cancelRefundModal" class="hidden fixed inset-0 z-[60] flex items-center justify-center bg-black/90 backdrop-blur-md transition-opacity" onclick="tutupModalCancelRefund()">
+        <div class="bg-[#0A0C10] rounded-2xl border border-red-500/30 shadow-[0_0_50px_rgba(239,68,68,0.2)] w-full max-w-md overflow-hidden relative flex flex-col mx-4" onclick="event.stopPropagation()">
+            <div class="p-6 border-b border-white/10 flex justify-between items-center">
+                <h3 class="text-white font-bold flex items-center gap-2">
+                    <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    Batalkan Pengajuan
+                </h3>
+                <button type="button" onclick="tutupModalCancelRefund()" class="text-gray-400 hover:text-white transition-colors">✕</button>
+            </div>
+            <form action="/refund/cancel" method="POST" class="flex flex-col">
+                @csrf
+                <input type="hidden" name="detail_transaksi_id" id="cancelRefundDetailId" value="">
+                
+                <div class="p-6 bg-[#12151C]">
+                    <p class="text-sm text-gray-300 leading-relaxed">
+                        Apakah Anda yakin ingin membatalkan pengajuan refund untuk game <strong id="cancelRefundGameName" class="text-white"></strong>?
+                    </p>
+                    <p class="text-xs text-gray-500 mt-2">
+                        Jika dibatalkan, pengajuan ini akan dihapus dari antrean Admin dan Anda bisa mengajukannya kembali nanti (jika belum lebih dari 14 hari).
+                    </p>
+                </div>
+                
+                <div class="p-6 border-t border-white/10 flex justify-end gap-3 bg-[#0A0C10]">
+                    <button type="button" onclick="tutupModalCancelRefund()" class="px-5 py-2.5 rounded-xl text-gray-400 hover:text-white font-medium transition-colors text-sm">Tutup</button>
+                    <button type="submit" class="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold transition-colors text-sm shadow-lg shadow-red-500/20">Ya, Batalkan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     {{-- MODAL TRIMMER VIDEO --}}
     <div id="videoTrimmerModal" class="hidden fixed inset-0 z-[60] flex items-center justify-center bg-black/90 backdrop-blur-md transition-opacity">
         <div class="bg-[#0A0C10] rounded-2xl border border-white/10 shadow-[0_0_50px_rgba(124,58,237,0.3)] w-full max-w-2xl overflow-hidden relative flex flex-col mx-4" onclick="event.stopPropagation()">
@@ -509,6 +621,9 @@
                 document.getElementById('mediaSubmit').files = dataTransfer.files;
             }
 
+            if (typeof window.showLoadingOverlay === 'function') {
+                window.showLoadingOverlay();
+            }
             return true;
         }
 
@@ -528,6 +643,46 @@
                 toast.classList.add('opacity-0', 'translate-y-8');
                 setTimeout(() => toast.remove(), 300);
             }, 3000);
+        }
+
+        function bukaModalRefund(detailId, gameName) {
+            document.getElementById('refundDetailId').value = detailId;
+            document.getElementById('refundGameName').innerText = gameName;
+            document.getElementById('refundModal').classList.remove('hidden');
+            
+            // Reset form saat dibuka
+            document.getElementById('alasanSelect').value = "";
+            document.getElementById('alasanLainnyaContainer').classList.add('hidden');
+            document.getElementById('alasanLainnyaInput').required = false;
+            document.getElementById('alasanLainnyaInput').value = "";
+        }
+
+        function tutupModalRefund() {
+            document.getElementById('refundModal').classList.add('hidden');
+        }
+
+        function bukaModalCancelRefund(detailId, gameName) {
+            document.getElementById('cancelRefundDetailId').value = detailId;
+            document.getElementById('cancelRefundGameName').innerText = gameName;
+            document.getElementById('cancelRefundModal').classList.remove('hidden');
+        }
+
+        function tutupModalCancelRefund() {
+            document.getElementById('cancelRefundModal').classList.add('hidden');
+        }
+
+        function toggleAlasanLainnya(value) {
+            const container = document.getElementById('alasanLainnyaContainer');
+            const input = document.getElementById('alasanLainnyaInput');
+            if (value === 'Lainnya') {
+                container.classList.remove('hidden');
+                input.required = true;
+                input.focus();
+            } else {
+                container.classList.add('hidden');
+                input.required = false;
+                input.value = "";
+            }
         }
 
         function bukaLibraryDetail(id, namaGame, image, kodeRaw) {
@@ -570,7 +725,7 @@
                 
                 // Set existing media
                 if (review.media) {
-                    existingMediaUrls = review.media.split(',');
+                    existingMediaUrls = review.media.split('|');
                 } else {
                     existingMediaUrls = [];
                 }
@@ -699,7 +854,7 @@
             container.innerHTML = '';
             
             // Update hidden input untuk media yang masih dipertahankan
-            document.getElementById('existingMediaInput').value = existingMediaUrls.join(',');
+            document.getElementById('existingMediaInput').value = existingMediaUrls.join('|');
             
             if (selectedMediaFiles.length > 0 || existingMediaUrls.length > 0) {
                 container.classList.remove('hidden');
@@ -708,10 +863,12 @@
                 existingMediaUrls.forEach((m, index) => {
                     const wrapper = document.createElement('div');
                     wrapper.className = 'relative w-24 h-24 rounded-xl overflow-hidden border border-purple-500/50 group flex-shrink-0';
-                    let extension = m.split('.').pop().toLowerCase();
+                    let cleanUrl = m.split('#')[0];
+                    let hashPart = m.includes('#') ? '#' + m.split('#')[1] : '';
+                    let extension = cleanUrl.split('.').pop().toLowerCase();
                     let mediaElement = '';
-                    if (['mp4', 'webm', 'ogg'].includes(extension)) {
-                        mediaElement = `<video src="/${m}" class="w-full h-full object-cover" muted loop autoplay></video>`;
+                    if (['mp4', 'webm', 'ogg', 'mov'].includes(extension)) {
+                        mediaElement = `<video src="/stream-media?path=${cleanUrl}${hashPart}" class="w-full h-full object-cover" muted loop autoplay></video>`;
                     } else {
                         mediaElement = `<img src="/${m}" class="w-full h-full object-cover">`;
                     }
@@ -1015,5 +1172,7 @@
             }
         }
     </script>
+@include('components.loading-overlay')
+@include('components.toast-notification')
 </body>
 </html>

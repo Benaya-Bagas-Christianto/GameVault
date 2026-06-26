@@ -95,18 +95,111 @@
     
 </head>
 
-<body class="p-6 md:p-10 selection:bg-purple-500 selection:text-white min-h-screen">
+<body class="antialiased bg-[#0A0B0E] text-white overflow-x-hidden selection:bg-purple-500 selection:text-white min-h-screen flex flex-col">
 
-    <div id="bantuanContent" class="max-w-5xl mx-auto page-enter">
-        {{-- Tombol Kembali --}}
-        <div class="mb-10 animate-in">
-            <a href="/" data-nav class="text-gray-500 hover:text-white flex items-center gap-2 w-fit transition-colors">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                </svg>
-                Kembali ke Beranda
+    <header class="h-20 border-b border-white/5 flex items-center justify-between px-6 z-30 sticky top-0 bg-[#0A0B0E]/95 backdrop-blur-md flex-shrink-0">
+        {{-- Kiri: Logo & Search --}}
+        <div class="flex-1 flex justify-start items-center gap-6">
+            <a href="/" class="flex-shrink-0 flex items-center group">
+                <img src="{{ asset('assets/Logo Game Vault 1.png') }}" alt="GameVault Logo" class="h-6 sm:h-7 lg:h-8 w-auto drop-shadow-[0_0_15px_rgba(124,58,237,0.8)] group-hover:drop-shadow-[0_0_25px_rgba(124,58,237,1)] transition-all duration-300">
             </a>
+                            @include('components.search-bar')
         </div>
+
+        {{-- Tengah: Navigasi --}}
+        <nav class="flex-1 hidden lg:flex items-center justify-center gap-8 xl:gap-10 text-sm font-medium h-full">
+            <a href="/" id="nav-beranda" class="{{ request()->is('/') ? 'text-purple-400 border-purple-500' : 'text-gray-400 border-transparent hover:text-white' }} border-b-2 pb-7 pt-7 transition-all">Beranda</a>
+            <a href="/kategori" id="nav-kategori" class="{{ request()->is('kategori') ? 'text-purple-400 border-purple-500' : 'text-gray-400 border-transparent hover:text-white' }} border-b-2 pb-7 pt-7 transition-all">Kategori</a>
+            <a href="/bantuan" class="{{ request()->is('bantuan') ? 'text-purple-400 border-purple-500' : 'text-gray-400 border-transparent hover:text-white' }} border-b-2 pb-7 pt-7 transition-all">Bantuan</a>
+        </nav>
+
+        {{-- Kanan: Ikon & Login --}}
+        <div class="flex-1 flex items-center justify-end gap-4 sm:gap-5">
+            {{-- ICON KERANJANG --}}
+            <a href="/cart" class="relative {{ request()->is('cart') ? 'text-[#8B5CF6]' : 'text-gray-400 hover:text-white' }} transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2 3H4.5L6.5 17H17M17 17C15.8954 17 15 17.8954 15 19C15 20.1046 15.8954 21 17 21C18.1046 21 19 20.1046 19 19C19 17.8954 18.1046 17 17 17ZM6.07142 14H18L21 5H4.78571M11 19C11 20.1046 10.1046 21 9 21C7.89543 21 7 20.1046 7 19C7 17.8954 7.89543 17 9 17C10.1046 17 11 17.8954 11 19Z"></path>
+                </svg>
+                    @php
+                        $globalCartCount = Auth::check() ? \App\Models\Keranjang::where('user_id', Auth::id())->count() : 0;
+                    @endphp
+                    <span id="globalCartBadge" class="absolute -top-1.5 -right-1.5 w-4 h-4 text-white text-[9px] font-bold items-center justify-center rounded-full" style="background-color: #7C3AED !important; display: {{ $globalCartCount > 0 ? 'flex' : 'none' }} !important;">{{ $globalCartCount }}</span>
+                    <script>
+                        window.syncCartBadge = function(e) {
+    let isLoggedIn = @json(Auth::check());
+    if (!isLoggedIn) return;
+    if (localStorage.getItem('cartCount') === null) {
+        if (typeof updateGlobalCartBadge === 'function') updateGlobalCartBadge();
+        return;
+    }
+    let cachedCount = parseInt(localStorage.getItem('cartCount')) || 0;
+    let badgeInit = document.getElementById('globalCartBadge');
+    if (badgeInit) {
+        badgeInit.innerText = cachedCount;
+        badgeInit.style.setProperty('display', cachedCount > 0 ? 'flex' : 'none', 'important');
+    }
+};
+                        window.addEventListener('pageshow', window.syncCartBadge);
+                    </script>
+                </a>
+
+                {{-- ICON WISHLIST --}}
+                <a href="/wishlist" class="relative {{ request()->is('wishlist') ? 'text-[#8B5CF6]' : 'text-gray-400 hover:text-white' }} transition-colors hidden sm:block">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path>
+                    </svg>
+                    @php
+                        $globalWishlistCount = Auth::check() ? \App\Models\Wishlist::where('user_id', Auth::id())->count() : 0;
+                    @endphp
+                    <span class="globalWishlistBadge absolute -top-1.5 -right-1.5 w-4 h-4 text-white text-[9px] font-bold items-center justify-center rounded-full" style="background-color: #EF4444 !important; display: {{ $globalWishlistCount > 0 ? 'flex' : 'none' }} !important;">{{ $globalWishlistCount }}</span>
+                </a>
+                <script>
+                    window.syncWishlistBadge = function(e) {
+    let isLoggedIn = @json(Auth::check());
+    if (!isLoggedIn) return;
+    let cachedWishlist = localStorage.getItem('wishlist');
+    if (cachedWishlist === null) {
+        if (typeof updateGlobalWishlistBadge === 'function') updateGlobalWishlistBadge();
+        return;
+    }
+    let wishlist = JSON.parse(cachedWishlist) || [];
+    let cachedCount = wishlist.length;
+    let badges = document.querySelectorAll('.globalWishlistBadge, #globalWishlistBadge');
+    badges.forEach(badgeInit => {
+        badgeInit.innerText = cachedCount;
+        badgeInit.style.setProperty('display', cachedCount > 0 ? 'flex' : 'none', 'important');
+    });
+};
+                    window.addEventListener('pageshow', window.syncWishlistBadge);
+                </script>
+
+            <div class="h-6 w-px bg-white/10 mx-1 hidden sm:block"></div>
+            @auth
+            <div class="relative cursor-pointer" onclick="toggleSettings()" id="settingsBtn">
+                @if(isset($pendingRefundsCount) && $pendingRefundsCount > 0)
+                    <div class="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full border-2 border-[#12151C] z-10" style="margin-top: -2px; margin-right: -2px;"></div>
+                @endif
+                <div class="flex items-center gap-3 border border-white/5 py-1.5 pl-1.5 pr-4 rounded-full" style="background-color: #12151C !important;">
+                    @if(Auth::user()->foto)
+                    <img src="{{ asset('assets/profile/' . Auth::user()->foto) }}" class="w-10 h-10 rounded-full object-cover border border-purple-500/50">
+                    @else
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold !text-white" style="background: linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%);">{{ strtoupper(substr(Auth::user()->username ?? 'U', 0, 1)) }}</div>
+                    @endif
+                    <span class="text-sm font-semibold !text-white hidden sm:block">{{ Auth::user()->username }}</span>
+                    <svg class="w-4 h-4 text-gray-500 hidden sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
+                @include('components.settings-dropdown')
+            </div>
+            @else
+            <a href="/login" class="px-5 py-1.5 bg-white text-black text-xs font-bold rounded-full hover:bg-gray-200 transition-colors">LOGIN</a>
+            @endauth
+        </div>
+    </header>
+
+    <div id="bantuanContent" class="max-w-5xl mx-auto page-enter p-6 md:p-10 mt-4">
+
 
         {{-- Hero Section --}}
         <div class="text-center mb-16 relative animate-in animate-in-delay-1">
@@ -281,6 +374,7 @@
 
     <script>
 </script>
+@include('components.toast-notification')
 </body>
 
 </html>

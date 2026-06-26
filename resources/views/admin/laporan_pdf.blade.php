@@ -238,5 +238,7 @@
         <p>&copy; {{ date('Y') }} GameVault System. Dokumen ini di-generate secara otomatis dan sah.</p>
     </div>
 
+@include('components.success-modal')
+    @include('components.toast-notification')
 </body>
 </html>

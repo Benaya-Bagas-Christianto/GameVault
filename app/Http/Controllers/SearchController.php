@@ -18,7 +18,7 @@ class SearchController extends Controller
 
         if ($keyword) {
             $flexKeyword = str_replace(' ', '%', $keyword);
-            $query->where(fn($q) => $q->where('name','LIKE',"%$flexKeyword%")->orWhere('description','LIKE',"%$flexKeyword%"));
+            $query->where('name', 'LIKE', "%$flexKeyword%");
         }
         
         if ($platform) {
