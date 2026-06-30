@@ -9,7 +9,7 @@ class Refund extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'detail_transaksi_id', 'alasan', 'status'];
+    protected $fillable = ['user_id', 'detail_transaksi_id', 'alasan', 'status', 'is_notified'];
 
     public function user() {
         return $this->belongsTo(User::class, 'user_id');

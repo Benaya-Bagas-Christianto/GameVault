@@ -19,6 +19,7 @@ class User extends Authenticatable
         'username', 
         'email',
         'password',
+        'pin',
     ];
 
     // 3. Matikan updated_at karena di tabelmu cuma ada created_at

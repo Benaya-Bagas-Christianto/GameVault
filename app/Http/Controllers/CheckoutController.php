@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Keranjang;
@@ -14,35 +15,38 @@ use Midtrans\Snap;
 
 class CheckoutController extends Controller
 {
-    public function process(Request $request) {
-        if (!Auth::check()) return response()->json(['status'=>'error','message'=>'Silakan login']);
+    public function process(Request $request)
+    {
+        if (!Auth::check()) return response()->json(['status' => 'error', 'message' => 'Silakan login']);
 
         $user = Auth::user();
-        
+
         $query = Keranjang::with('game')->where('user_id', $user->id);
         if ($request->has('selected_ids') && is_array($request->selected_ids)) {
             $query->whereIn('game_id', $request->selected_ids);
         }
         $items = $query->get();
-        
-        if ($items->isEmpty()) return response()->json(['status'=>'error','message'=>'Keranjang kosong atau item tidak ditemukan']);
 
-                $total = $items->sum(fn($k) => $k->game->price * $k->quantity);
+        if ($items->isEmpty()) return response()->json(['status' => 'error', 'message' => 'Keranjang kosong atau item tidak ditemukan']);
+
+        $total = $items->sum(fn($k) => $k->game->price * $k->quantity);
 
         if ($total == 0) {
             // BYPASS MIDTRANS
-            $trx = Transaksi::create(['user_id'=>$user->id,'total_bayar'=>0,'status'=>'Success']);
-            
+            $trx = Transaksi::create(['user_id' => $user->id, 'total_bayar' => 0, 'status' => 'Success']);
+
             $detailsForEmail = [];
             foreach ($items as $item) {
-                DetailTransaksi::create([
+                $detail = DetailTransaksi::create([
                     'transaksi_id'   => $trx->id,
                     'game_id'        => $item->game_id,
-                    'harga_saat_beli'=> 0,
+                    'harga_saat_beli' => 0,
                 ]);
 
-                // Generate Kode Lisensi
-                $key = 'GV-' . strtoupper(Str::random(4)) . '-' . strtoupper(Str::random(4));
+                // Generate Kode Lisensi (Sama dengan format di UI)
+                $tgl_beli = \Carbon\Carbon::parse($trx->created_at)->format('Y-m-d H:i:s');
+                $kodeRaw = strtoupper(substr(md5($item->game_id . $user->id . $tgl_beli), 0, 12));
+                $key = 'GV-' . substr($kodeRaw, 0, 4) . '-' . substr($kodeRaw, 4, 4) . '-' . substr($kodeRaw, 8, 4);
                 $detailsForEmail[] = (object)[
                     'name' => $item->game->name,
                     'harga_saat_beli' => 0,
@@ -63,29 +67,29 @@ class CheckoutController extends Controller
 
                 $pdfContent = $pdf->output();
 
-                Mail::send('emails.lisensi', ['user' => $user, 'details' => $detailsForEmail], function($message) use ($user, $trx, $pdfContent) {
+                Mail::send('emails.lisensi', ['user' => $user, 'details' => $detailsForEmail], function ($message) use ($user, $trx, $pdfContent) {
                     $message->to($user->email)
-                            ->subject('Lisensi Game Gratis & Invoice - GameVault #' . $trx->id)
-                            ->attachData($pdfContent, 'Invoice-GameVault-#' . $trx->id . '.pdf', [
-                                'mime' => 'application/pdf',
-                            ]);
+                        ->subject('Lisensi Game Gratis & Invoice - GameVault #' . $trx->id)
+                        ->attachData($pdfContent, 'Invoice-GameVault-#' . $trx->id . '.pdf', [
+                            'mime' => 'application/pdf',
+                        ]);
                 });
             } catch (\Exception $e) {
                 \Illuminate\Support\Facades\Log::error('Gagal kirim email: ' . $e->getMessage());
             }
 
-            return response()->json(['status'=>'success', 'is_free' => true, 'order_id' => $trx->id]);
+            return response()->json(['status' => 'success', 'is_free' => true, 'order_id' => $trx->id]);
         }
 
         // Buat Transaksi dengan status PENDING
-        $trx = Transaksi::create(['user_id'=>$user->id,'total_bayar'=>$total,'status'=>'Pending']);
+        $trx = Transaksi::create(['user_id' => $user->id, 'total_bayar' => $total, 'status' => 'Pending']);
 
         $itemDetails = [];
         foreach ($items as $item) {
             DetailTransaksi::create([
                 'transaksi_id'   => $trx->id,
                 'game_id'        => $item->game_id,
-                'harga_saat_beli'=> $item->game->price, // Ini tetap harga satuan
+                'harga_saat_beli' => $item->game->price, // Ini tetap harga satuan
             ]);
 
             $itemDetails[] = [
@@ -96,8 +100,8 @@ class CheckoutController extends Controller
             ];
         }
 
-        // SETUP MIDTRANS (Merge dari teman: Menggunakan .env)
-        Config::$serverKey = env('MIDTRANS_SERVER_KEY', 'Mid-server-tADVX9-15wfmU2wUv60szXql'); 
+        // SETUP MIDTRANS 
+        Config::$serverKey = env('MIDTRANS_SERVER_KEY', 'Mid-server-tADVX9-15wfmU2wUv60szXql');
         Config::$clientKey = env('MIDTRANS_CLIENT_KEY');
         Config::$isProduction = env('MIDTRANS_IS_PRODUCTION', false);
         Config::$isSanitized = true;
@@ -120,17 +124,17 @@ class CheckoutController extends Controller
             $snapToken = Snap::getSnapToken($payload);
             $trx->snap_token = $snapToken;
             $trx->save();
-            
-            // NOTE: Jangan kosongkan keranjang di sini, biarkan keranjang utuh
-            // sampai notifikasi sukses diterima dari Midtrans
-            
-            return response()->json(['status'=>'success', 'snap_token' => $snapToken, 'order_id' => $trx->id]);
+
+
+            return response()->json(['status' => 'success', 'snap_token' => $snapToken, 'order_id' => $trx->id]);
         } catch (\Exception $e) {
-            // MERGE DARI TEMAN: JIKA GAGAL: Hapus transaksi Pending biar gak nyangkut di Riwayat Pembelian
+
+
+            
             DetailTransaksi::where('transaksi_id', $trx->id)->delete();
             $trx->delete();
-            
-            return response()->json(['status'=>'error','message'=>'Error dari Midtrans: ' . $e->getMessage()]);
+
+            return response()->json(['status' => 'error', 'message' => 'Error dari Midtrans: ' . $e->getMessage()]);
         }
     }
 
@@ -152,7 +156,7 @@ class CheckoutController extends Controller
         // Jika Midtrans bilang sukses dibayar (capture/settlement)
         if ($transactionStatus == 'capture' || $transactionStatus == 'settlement') {
             if ($trx->status == 'Pending') {
-                
+
                 // 1. Ubah status jadi Success
                 $trx->status = 'Success';
                 $trx->save();
@@ -160,11 +164,13 @@ class CheckoutController extends Controller
                 // 2. Generate Kode Lisensi (Activation Key)
                 $details = DetailTransaksi::with('game')->where('transaksi_id', $trx->id)->get();
                 $detailsForEmail = [];
-                
-                foreach($details as $d) {
-                    // Membuat kode acak misal: GV-X8K9-M2P1
-                    $key = 'GV-' . strtoupper(Str::random(4)) . '-' . strtoupper(Str::random(4));
-                    
+
+                foreach ($details as $d) {
+                    // Membuat kode acak (Sama dengan format di UI)
+                    $tgl_beli = \Carbon\Carbon::parse($trx->created_at)->format('Y-m-d H:i:s');
+                    $kodeRaw = strtoupper(substr(md5($d->game_id . $trx->user_id . $tgl_beli), 0, 12));
+                    $key = 'GV-' . substr($kodeRaw, 0, 4) . '-' . substr($kodeRaw, 4, 4) . '-' . substr($kodeRaw, 8, 4);
+
                     // Kalau kamu punya kolom activation_key di tabel tb_detail_transaksi, aktifkan kode di bawah ini:
                     // $d->activation_key = $key;
                     // $d->save();
@@ -193,12 +199,12 @@ class CheckoutController extends Controller
 
                     $pdfContent = $pdf->output();
 
-                    Mail::send('emails.lisensi', ['user' => $user, 'details' => $detailsForEmail], function($message) use ($user, $trx, $pdfContent) {
+                    Mail::send('emails.lisensi', ['user' => $user, 'details' => $detailsForEmail], function ($message) use ($user, $trx, $pdfContent) {
                         $message->to($user->email)
-                                ->subject('Lisensi Game & Invoice Pembelian - GameVault #' . $trx->id)
-                                ->attachData($pdfContent, 'Invoice-GameVault-#' . $trx->id . '.pdf', [
-                                    'mime' => 'application/pdf',
-                                ]);
+                            ->subject('Lisensi Game & Invoice Pembelian - GameVault #' . $trx->id)
+                            ->attachData($pdfContent, 'Invoice-GameVault-#' . $trx->id . '.pdf', [
+                                'mime' => 'application/pdf',
+                            ]);
                     });
                 } catch (\Exception $e) {
                     \Illuminate\Support\Facades\Log::error('Gagal kirim email: ' . $e->getMessage());
@@ -223,7 +229,8 @@ class CheckoutController extends Controller
     }
 
     // 3. FUNGSI SUCCESS: Cek status Midtrans langsung dari Frontend (Bypass Webhook Delay)
-    public function success(Request $request) {
+    public function success(Request $request)
+    {
         $orderId = $request->order_id;
         if (!$orderId) return response()->json(['status' => 'error', 'message' => 'No Order ID']);
 
@@ -234,7 +241,7 @@ class CheckoutController extends Controller
         try {
             // Tanya status langsung ke Midtrans API
             $statusResponse = \Midtrans\Transaction::status($orderId);
-            
+
             // Jika statusnya sudah terbayar
             if (isset($statusResponse->transaction_status) && in_array($statusResponse->transaction_status, ['capture', 'settlement'])) {
                 // Simulasikan Request Webhook dan tembakkan ke fungsi notification() kita sendiri
@@ -250,10 +257,11 @@ class CheckoutController extends Controller
     }
 
     // 4. FUNGSI CANCEL JIKA BELUM MILIH METODE PEMBAYARAN (onClose Snap)
-    public function cancelIfUnpaid(Request $request) {
+    public function cancelIfUnpaid(Request $request)
+    {
         $orderId = $request->order_id;
         if (!$orderId) return response()->json(['status' => 'error', 'message' => 'No Order ID']);
-        
+
         $trx = Transaksi::find($orderId);
         if (!$trx || $trx->status != 'Pending') return response()->json(['status' => 'ok']);
 
@@ -266,12 +274,12 @@ class CheckoutController extends Controller
             $statusResponse = \Midtrans\Transaction::status($orderId);
             // Jika tidak ada Exception (404), berarti transaksi sudah masuk ke sistem Midtrans 
             // (user sudah memilih metode pembayaran seperti VA). Biarkan tetap Pending.
-            
+
             // Hapus dari keranjang karena sudah resmi pending di Midtrans
             $details = DetailTransaksi::where('transaksi_id', $trx->id)->get();
             $gameIds = $details->pluck('game_id')->toArray();
             Keranjang::where('user_id', $trx->user_id)->whereIn('game_id', $gameIds)->delete();
-            
+
             return response()->json(['status' => 'kept']);
         } catch (\Exception $e) {
             // Jika 404 (Exception), berarti user belum memilih metode pembayaran apapun (hanya buka popup lalu tutup).
@@ -283,18 +291,19 @@ class CheckoutController extends Controller
     }
 
     // 5. FUNGSI MARK PENDING KETIKA USER SUDAH PILIH METODE (ON-PENDING SNAP)
-    public function markPending(Request $request) {
+    public function markPending(Request $request)
+    {
         $orderId = $request->order_id;
         if (!$orderId) return response()->json(['status' => 'error', 'message' => 'No Order ID']);
-        
+
         $trx = Transaksi::find($orderId);
         if (!$trx || $trx->status != 'Pending') return response()->json(['status' => 'ok']);
-        
+
         // Hapus dari keranjang karena sudah resmi pending di Midtrans (misal VA dicetak)
         $details = DetailTransaksi::where('transaksi_id', $trx->id)->get();
         $gameIds = $details->pluck('game_id')->toArray();
         Keranjang::where('user_id', $trx->user_id)->whereIn('game_id', $gameIds)->delete();
-        
+
         return response()->json(['status' => 'ok']);
     }
 }

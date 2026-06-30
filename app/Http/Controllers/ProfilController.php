@@ -208,29 +208,34 @@ class ProfilController extends Controller
             'email_otp'     => $otp
         ]);
 
-        // Siapkan Template Email untuk Mailtrap
-        $body = "
-            <div style='background-color: #0A0C10; color: white; padding: 30px; font-family: sans-serif; border-radius: 15px; max-width: 450px; margin: auto;'>
-                <h2 style='color: #7C3AED; text-align: center; tracking-widest: 2px;'>GAMEVAULT 🎮</h2>
-                <hr style='border-color: rgba(255,255,255,0.1);'>
-                <p>Halo, <strong>" . auth()->user()->username . "</strong>!</p>
-                <p>Kami menerima permintaan perubahan alamat email akun GameVault kamu ke: <span style='color: #a78bfa; font-weight: bold;'>" . $emailBaru . "</span></p>
-                <p>Berikut adalah 6-digit kode verifikasi OTP kamu:</p>
-                <div style='background-color: #12151C; border: 1px solid #7C3AED; padding: 15px; border-radius: 10px; text-align: center; margin: 20px 0;'>
-                    <span style='font-size: 24px; font-family: monospace; font-weight: bold; color: #FDE047; letter-spacing: 5px;'>" . $otp . "</span>
-                </div>
-                <p style='font-size: 11px; color: #666;'>Jika kamu tidak merasa melakukan perubahan ini, abaikan email ini keamanan akunmu tetap terjaga.</p>
-            </div>
-        ";
-
         // Kirim email menggunakan Mailtrap (Konfigurasi otomatis mengikuti .env kamu)
-        \Illuminate\Support\Facades\Mail::html($body, function($message) use ($emailBaru) {
-            $message->to($emailBaru)
-                    ->subject('Kode Verifikasi Ganti Email - GameVault');
+        \Illuminate\Support\Facades\Mail::send([], [], function($message) use ($emailBaru, $otp) {
+            $logoCid = $message->embed(public_path('assets/Logo Game Vault 1.png'));
+            $emailLama = auth()->user()->email;
+            
+            $body = "
+                <div style='background-color: #0A0C10; color: white; padding: 30px; font-family: sans-serif; border-radius: 15px; max-width: 450px; margin: auto;'>
+                    <div style='text-align: center; margin-bottom: 20px;'>
+                        <img src='" . $logoCid . "' alt='GameVault Logo' style='max-height: 50px;'>
+                    </div>
+                    <hr style='border-color: rgba(255,255,255,0.1);'>
+                    <p>Halo, <strong>" . auth()->user()->username . "</strong>!</p>
+                    <p>Kami menerima permintaan perubahan alamat email akun GameVault kamu dari <span style='color: #ef4444; text-decoration: line-through;'>" . $emailLama . "</span> menjadi <span style='color: #a78bfa; font-weight: bold;'>" . $emailBaru . "</span>.</p>
+                    <p>Untuk memastikan ini benar-benar kamu, berikut adalah 6-digit kode verifikasi OTP kamu:</p>
+                    <div style='background-color: #12151C; border: 1px solid #7C3AED; padding: 15px; border-radius: 10px; text-align: center; margin: 20px 0;'>
+                        <span style='font-size: 24px; font-family: monospace; font-weight: bold; color: #FDE047; letter-spacing: 5px;'>" . $otp . "</span>
+                    </div>
+                    <p style='font-size: 11px; color: #666;'>Jika kamu tidak merasa melakukan perubahan ini, abaikan email ini keamanan akunmu tetap terjaga.</p>
+                </div>
+            ";
+
+            $message->to($emailLama)
+                    ->subject('Otorisasi Ganti Email - GameVault')
+                    ->html($body);
         });
 
         // Alihkan ke halaman input kode verifikasi OTP
-        return redirect('/profil/ganti-email/verifikasi')->with('status', 'success')->with('msg', 'Kode OTP telah dikirimkan ke email baru Anda! Silakan cek Mailtrap.');
+        return redirect('/profil/ganti-email/verifikasi')->with('status', 'success')->with('msg', 'Kode OTP telah dikirimkan ke email LAMA Anda (' . auth()->user()->email . ') untuk konfirmasi keamanan!');
     }
 
     // 3. Menampilkan Halaman Input OTP
@@ -268,6 +273,40 @@ class ProfilController extends Controller
         }
 
         return back()->with('status', 'error')->with('msg', 'Kode OTP yang Anda masukkan salah atau tidak valid!');
+    }
+
+    public function setPin(Request $request)
+    {
+        $user = auth()->user();
+
+        if ($user->pin) {
+            // Ubah PIN (Butuh PIN Lama)
+            $request->validate([
+                'old_pin' => 'required|digits:6',
+                'new_pin' => 'required|digits:6|confirmed'
+            ]);
+
+            if (!Hash::check($request->old_pin, $user->pin)) {
+                return back()->with('status', 'error')->with('msg', 'PIN lama salah!');
+            }
+
+            DB::table('tb_users')
+                ->where('id', $user->id)
+                ->update(['pin' => Hash::make($request->new_pin)]);
+            
+            return back()->with('status', 'success')->with('msg', 'PIN berhasil diubah!');
+        } else {
+            // Buat PIN Baru
+            $request->validate([
+                'new_pin' => 'required|digits:6|confirmed'
+            ]);
+
+            DB::table('tb_users')
+                ->where('id', $user->id)
+                ->update(['pin' => Hash::make($request->new_pin)]);
+            
+            return back()->with('status', 'success')->with('msg', 'PIN berhasil dibuat!');
+        }
     }
 
     // ngecek status via ajax polling

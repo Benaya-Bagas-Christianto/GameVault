@@ -1,0 +1,132 @@
+                    {{-- FORM GRID (Kiri: Profil, Kanan: Email & Keamanan) --}}
+
+                    <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+
+                        {{-- KOLOM KIRI: INFORMASI PROFIL --}}
+                        <div class="xl:col-span-2 panel-bg p-6 lg:p-8 rounded-2xl">
+                            <h2 class="text-xs font-bold text-gray-400 uppercase tracking-widest border-b border-[#1f1f1f] pb-4 mb-6">Informasi Profil</h2>
+
+                            <div class="space-y-6">
+                                {{-- Input tersembunyi --}}
+                                <input type="file" id="fotoInput" accept="image/*" class="hidden">
+                                <input type="hidden" name="cropped_photo" id="croppedPhotoInput">
+
+                                {{-- Baris 1: Username --}}
+                                <div>
+                                    <div class="flex justify-between items-end mb-2">
+                                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">Username</label>
+                                        <span class="text-[9px] text-green-400 font-bold tracking-widest">✓ Tersedia</span>
+                                    </div>
+                                    <input type="text" value="{{ Auth::user()->username }}" disabled class="w-full px-4 py-3.5 bg-[#050505] border border-[#1f1f1f] rounded-xl text-gray-500 cursor-not-allowed text-sm font-medium">
+                                    <p class="text-[10px] text-gray-600 mt-2">*Username bersifat permanen dan tidak dapat diubah.</p>
+                                </div>
+
+                                {{-- Baris 2: Nama Lengkap --}}
+                                <div>
+                                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Nama Lengkap</label>
+                                    <input type="text" name="name" value="{{ Auth::user()->name ?? '' }}" placeholder="Masukkan nama lengkap kamu" class="w-full px-4 py-3.5 input-bg rounded-xl text-white placeholder-gray-600 focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED]/30 transition-colors text-sm">
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- KOLOM KANAN: EMAIL & KEAMANAN --}}
+                        <div class="space-y-6">
+
+                            {{-- Kotak Email --}}
+                            <div class="panel-bg p-6 rounded-2xl">
+                                <h2 class="text-xs font-bold text-gray-400 uppercase tracking-widest border-b border-[#1f1f1f] pb-4 mb-6">Alamat Email</h2>
+                                <div class="flex justify-between items-end mb-2">
+                                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest">Email Terdaftar</label>
+                                    <span class="text-[9px] text-green-400 font-bold tracking-widest">✓ Terverifikasi</span>
+                                </div>
+                                <div class="w-full px-4 py-3.5 bg-[#050505] border border-[#1f1f1f] rounded-xl text-gray-300 text-sm font-medium mb-4 truncate">
+                                    {{ Auth::user()->email }}
+                                </div>
+                                <a href="/profil/ganti-email" class="flex justify-center w-full bg-[#12151C] hover:bg-[#1a1d24] border border-[#1f1f1f] text-gray-400 hover:text-white text-xs font-bold py-3 rounded-xl transition-colors uppercase tracking-widest">
+                                    Ubah Email Akun
+                                </a>
+                            </div>
+
+                            {{-- Kotak Keamanan (Ganti Password) --}}
+                            <div class="panel-bg p-6 rounded-2xl">
+                                <h2 class="text-xs font-bold text-gray-400 uppercase tracking-widest border-b border-[#1f1f1f] pb-4 mb-6">Keamanan Akun</h2>
+                                <div class="flex items-center gap-3 mb-5">
+                                    <span class="text-yellow-500 flex items-center justify-center"><svg class="w-5 h-5 fill-current" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                                            <path fill-rule="evenodd" clip-rule="evenodd" d="M8 16L4.35009 13.3929C2.24773 11.8912 1 9.46667 1 6.88306V3L8 0L15 3V6.88306C15 9.46667 13.7523 11.8912 11.6499 13.3929L8 16ZM12.2071 5.70711L10.7929 4.29289L7 8.08579L5.20711 6.29289L3.79289 7.70711L7 10.9142L12.2071 5.70711Z" />
+                                        </svg></span>
+                                    <p class="text-xs text-gray-400 leading-relaxed">Amankan akun kamu secara berkala dengan memperbarui kata sandi melalui tautan verifikasi email.</p>
+                                </div>
+                                <a href="javascript:void(0)" onclick="document.getElementById('formResetPassword').submit();" class="flex justify-center items-center gap-2 w-full bg-[#7C3AED]/10 hover:bg-[#7C3AED]/20 border border-[#7C3AED]/30 text-[#a78bfa] hover:text-white text-xs font-bold py-3 rounded-xl transition-all uppercase tracking-widest group">
+                                    <span class="group-hover:scale-110 transition-transform flex items-center justify-center">
+                                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M12 14.5V16.5M7 10.0288C7.47142 10 8.05259 10 8.8 10H15.2C15.9474 10 16.5286 10 17 10.0288M7 10.0288C6.41168 10.0647 5.99429 10.1455 5.63803 10.327C5.07354 10.6146 4.6146 11.0735 4.32698 11.638C4 12.2798 4 13.1198 4 14.8V16.2C4 17.8802 4 18.7202 4.32698 19.362C4.6146 19.9265 5.07354 20.3854 5.63803 20.673C6.27976 21 7.11984 21 8.8 21H15.2C16.8802 21 17.7202 21 18.362 20.673C18.9265 20.3854 19.3854 19.9265 19.673 19.362C20 18.7202 20 17.8802 20 16.2V14.8C20 13.1198 20 12.2798 19.673 11.638C19.3854 11.0735 18.9265 10.6146 18.362 10.327C18.0057 10.1455 17.5883 10.0647 17 10.0288M7 10.0288V8C7 5.23858 9.23858 3 12 3C14.7614 3 17 5.23858 17 8V10.0288" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                        </svg>
+                                    </span> Ganti Password
+                                </a>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    {{-- TOMBOL AKSI SIMPAN --}}
+                    <div class="flex items-center justify-end gap-4 mt-8 pt-6 border-t border-[#1f1f1f]">
+                        <a href="/" class="text-xs font-bold text-gray-500 hover:text-white transition-colors uppercase tracking-widest">Batal</a>
+                        <button type="submit" class="px-8 py-3.5 bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-xs font-bold uppercase tracking-widest rounded-xl transition-all shadow-[0_0_20px_rgba(124,58,237,0.2)]">
+                            Simpan Perubahan
+                        </button>
+                    </div>
+                </form>
+
+                {{-- FORM PIN INVOICE --}}
+                <div class="mt-8 pt-8 border-t border-[#1f1f1f]">
+                    <h2 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-6">Keamanan Unduhan (PIN Invoice)</h2>
+                    <div class="panel-bg p-6 rounded-2xl max-w-xl">
+                        <form action="/profil/set-pin" method="POST">
+                            @csrf
+                            <p class="text-xs text-gray-400 leading-relaxed mb-6">
+                                PIN 6-digit digunakan untuk mengamankan fitur unduh invoice. Pastikan PIN Anda mudah diingat tapi sulit ditebak.
+                            </p>
+
+                            @if(Auth::user()->pin)
+                                {{-- Jika sudah punya PIN, form ubah PIN --}}
+                                <div class="space-y-5">
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">PIN LAMA</label>
+                                        <input type="password" name="old_pin" maxlength="6" inputmode="numeric" class="w-full bg-[#12151C] border border-[#2A2E37] text-white text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-[#7C3AED] transition-colors" placeholder="Masukkan 6 angka PIN Lama">
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">PIN BARU</label>
+                                            <input type="password" name="new_pin" maxlength="6" inputmode="numeric" class="w-full bg-[#12151C] border border-[#2A2E37] text-white text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-[#7C3AED] transition-colors" placeholder="6 Angka">
+                                        </div>
+                                        <div>
+                                            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">KONFIRMASI PIN</label>
+                                            <input type="password" name="new_pin_confirmation" maxlength="6" inputmode="numeric" class="w-full bg-[#12151C] border border-[#2A2E37] text-white text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-[#7C3AED] transition-colors" placeholder="6 Angka">
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="w-full mt-2 bg-[#7C3AED]/10 hover:bg-[#7C3AED]/20 border border-[#7C3AED]/30 text-[#a78bfa] hover:text-white text-xs font-bold py-3 rounded-xl transition-all uppercase tracking-widest">
+                                        Perbarui PIN
+                                    </button>
+                                </div>
+                            @else
+                                {{-- Jika belum punya PIN, form buat PIN baru --}}
+                                <div class="space-y-5">
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">BUAT PIN (6 ANGKA)</label>
+                                            <input type="password" name="new_pin" maxlength="6" inputmode="numeric" class="w-full bg-[#12151C] border border-[#2A2E37] text-white text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-[#7C3AED] transition-colors" placeholder="Contoh: 123456">
+                                        </div>
+                                        <div>
+                                            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">ULANGI PIN</label>
+                                            <input type="password" name="new_pin_confirmation" maxlength="6" inputmode="numeric" class="w-full bg-[#12151C] border border-[#2A2E37] text-white text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-[#7C3AED] transition-colors" placeholder="Contoh: 123456">
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="w-full mt-2 bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-xs font-bold py-3 rounded-xl transition-all uppercase tracking-widest">
+                                        Simpan PIN
+                                    </button>
+                                </div>
+                            @endif
+                        </form>
+                    </div>
+                </div>
+

@@ -9,12 +9,25 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class InvoiceController extends Controller
 {
-    public function download($id)
+    public function download(Request $request, $id)
     {
+        $user = Auth::user();
+        if (!$user->pin) {
+            return back()->with('status', 'error')->with('msg', 'Anda belum mengatur PIN. Silakan atur PIN di menu Profil.');
+        }
+
+        $request->validate([
+            'pin' => 'required|digits:6'
+        ]);
+
+        if (!\Illuminate\Support\Facades\Hash::check($request->pin, $user->pin)) {
+            return back()->with('status', 'error')->with('msg', 'PIN yang Anda masukkan salah!');
+        }
+
         // 1. Cari data transaksi milik user yang sedang login
         $trx = DB::table('tb_transaksi')
             ->where('id', $id)
-            ->where('user_id', Auth::id())
+            ->where('user_id', $user->id)
             ->first();
 
         // Jika transaksi tidak ada atau bukan milik user ini, tolak aksesnya

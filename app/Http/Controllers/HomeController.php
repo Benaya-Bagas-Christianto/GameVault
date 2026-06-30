@@ -17,9 +17,9 @@ class HomeController extends Controller
             $seed = rand(1, 999999);
             session(['game_seed' => $seed]);
         }
-        
+
         if ($hasKeepSeed) {
-            // Hapus cookie secara raw karena diset via JS
+
             setcookie('keep_seed', '', time() - 3600, '/');
             unset($_COOKIE['keep_seed']);
         }

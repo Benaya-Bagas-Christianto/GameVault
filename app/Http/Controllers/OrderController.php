@@ -20,7 +20,7 @@ class OrderController extends Controller
         return view('orders', compact('transaksi'));
     }
 
-    // Menyimpan ulasan (rating & komentar)
+    // Menyimpan ulasan (rating & komentar tar tar tar wkwkwk)
     public function simpanReview(Request $request) {
         $mediaPaths = [];
         $videoCuts = json_decode($request->input('video_cuts', '{}'), true);

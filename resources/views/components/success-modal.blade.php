@@ -16,13 +16,33 @@
 </div>
 
 <script>
-    // FUNGSI MENGATUR MODAL SUKSES/ERROR GLOBAL
-    window.showToast = function(message, isError = false) {
+    window.toastQueue = [];
+    window.isToastShowing = false;
+    window.toastCallback = null;
+
+    // FUNGSI MENGATUR MODAL SUKSES/ERROR GLOBAL DENGAN SISTEM ANTREAN
+    window.showToast = function(message, isError = false, callback = null) {
+        window.toastQueue.push({ message, isError, callback });
+        if (!window.isToastShowing) {
+            window.processToastQueue();
+        }
+    };
+
+    window.processToastQueue = function() {
+        if (window.toastQueue.length === 0) {
+            window.isToastShowing = false;
+            return;
+        }
+        
+        window.isToastShowing = true;
+        const currentToast = window.toastQueue.shift();
+        window.toastCallback = currentToast.callback;
+
         const modal = document.getElementById('successModal');
         const content = document.getElementById('successModalContent');
         if (!modal) return;
         
-        document.getElementById('successModalText').innerText = message;
+        document.getElementById('successModalText').innerText = currentToast.message;
         
         // Handle styling based on success/error
         const iconContainer = document.getElementById('toastIconContainer');
@@ -31,7 +51,7 @@
         const title = document.getElementById('toastTitle');
         const btn = document.getElementById('toastBtn');
         
-        if (isError) {
+        if (currentToast.isError) {
             iconContainer.className = 'flex items-center justify-center w-16 h-16 mx-auto bg-red-500/20 rounded-full mb-4';
             iconSuccess.classList.add('hidden');
             iconError.classList.remove('hidden');
@@ -70,6 +90,18 @@
         setTimeout(() => {
             modal.classList.add('hidden');
             modal.classList.remove('flex');
+            
+            // Panggil callback setelah animasi selesai
+            if (typeof window.toastCallback === 'function') {
+                window.toastCallback();
+                window.toastCallback = null;
+            }
+
+            // Cek apakah ada antrean lagi
+            setTimeout(() => {
+                window.processToastQueue();
+            }, 300);
+            
         }, 300);
     };
 </script>

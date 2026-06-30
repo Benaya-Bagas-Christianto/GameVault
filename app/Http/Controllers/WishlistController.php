@@ -7,8 +7,6 @@ use Illuminate\Support\Facades\Auth;
 class WishlistController extends Controller
 {
     public function toggle(Request $request) {
-        if (!Auth::check()) return response()->json(['status'=>'error','message'=>'Login dulu yuk!']);
-
         $game_id = $request->product_id ?? $request->game_id;
         $existing = Wishlist::where('user_id', Auth::id())->where('game_id', $game_id)->first();
 

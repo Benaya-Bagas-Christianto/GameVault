@@ -21,26 +21,41 @@ class AuthController extends Controller
     }
 
     public function register(Request $request) {
+        $errors = [];
+
         if ($request->password !== $request->confirm_password) {
-            return back()->with('status', 'error')->with('msg', 'Konfirmasi password tidak cocok!');
+            $errors[] = 'Konfirmasi password tidak cocok!';
+        }
+
+        if ($request->pin !== $request->pin_confirmation) {
+            $errors[] = 'Konfirmasi PIN tidak cocok!';
+        }
+
+        if (strlen($request->pin) !== 6 || !is_numeric($request->pin)) {
+            $errors[] = 'PIN harus berupa 6 digit angka!';
         }
 
         if (!preg_match('/[A-Z]/', $request->password) || 
             !preg_match('/[a-z]/', $request->password) || 
             !preg_match('/[0-9]/', $request->password) || 
             !preg_match('/[\W_]/', $request->password)) {
-            return back()->with('status', 'error')->with('msg', 'Password harus mengandung huruf besar, huruf kecil, angka, dan simbol!');
+            $errors[] = 'Password harus mengandung huruf besar, huruf kecil, angka, dan simbol!';
         }
 
         $existing = User::where('username', $request->username)->orWhere('email', $request->email)->first();
         if ($existing) {
-            return back()->with('status', 'error')->with('msg', 'Username atau Email sudah terdaftar!');
+            $errors[] = 'Username atau Email sudah terdaftar!';
+        }
+
+        if (count($errors) > 0) {
+            return back()->with('status', 'error')->withErrors($errors)->withInput($request->all());
         }
 
         $user = User::create([
             'username' => $request->username,
             'email'    => $request->email,
             'password' => Hash::make($request->password),
+            'pin'      => Hash::make($request->pin),
         ]);
 
         Auth::login($user);

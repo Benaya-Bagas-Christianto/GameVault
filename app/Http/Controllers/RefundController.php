@@ -13,6 +13,45 @@ use App\Mail\RefundStatusMail;
 
 class RefundController extends Controller
 {
+    // API endpoint untuk cek notifikasi refund user
+    public function checkNotif(Request $request)
+    {
+        $userId = \Illuminate\Support\Facades\Auth::id();
+        
+        $notifications = Refund::whereHas('detailTransaksi.transaksi', function($q) use ($userId) {
+            $q->where('user_id', $userId);
+        })
+        ->where('is_notified', false)
+        ->whereIn('status', ['approved', 'rejected'])
+        ->with('detailTransaksi.game')
+        ->get();
+        
+        $notifData = [];
+        foreach($notifications as $notif) {
+            $gameName = $notif->detailTransaksi->game->name ?? 'Game';
+            $statusStr = $notif->status == 'approved' ? 'disetujui' : 'ditolak';
+            $notifData[] = [
+                'id' => $notif->id,
+                'message' => "Pengajuan refund untuk $gameName telah $statusStr.",
+                'type' => $notif->status == 'approved' ? 'success' : 'error'
+            ];
+            // KITA TIDAK LAGI MENANDAI SEBAGAI NOTIFIED DI SINI
+        }
+        
+        return response()->json(['notifications' => $notifData]);
+    }
+
+    // API endpoint untuk menandai notifikasi sudah di-klik
+    public function markNotified($id)
+    {
+        $refund = Refund::find($id);
+        if ($refund) {
+            $refund->update(['is_notified' => true]);
+            return response()->json(['success' => true]);
+        }
+        return response()->json(['success' => false], 404);
+    }
+
     // User submits refund request
     public function requestRefund(Request $request)
     {

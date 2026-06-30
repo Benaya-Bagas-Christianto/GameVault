@@ -360,6 +360,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                 </svg>
             </div>
+
             <h3 class="text-xl font-black text-center text-white mb-2">Batalkan Pesanan?</h3>
             <p class="text-gray-400 text-center text-sm mb-6 leading-relaxed">Yakin ingin membatalkan pesanan ini? Tindakan ini tidak dapat dikembalikan.</p>
             <div class="flex gap-3">
@@ -449,7 +450,12 @@
                     } else if(trx.status === 'Success') {
                         document.getElementById('modalTrxStatus').innerHTML = `<span class="inline-flex items-center gap-1.5 text-[10px] px-2.5 py-1 bg-green-500/10 text-green-400 border border-green-500/20 rounded font-bold uppercase tracking-wider"><span class="w-1.5 h-1.5 bg-green-400 rounded-full"></span> Sukses</span>`;
                         // Tambah tombol download
-                        document.getElementById('modalTrxActions').innerHTML += `<a href="/invoice/download/${trx.id}" class="flex-1 px-4 py-3 bg-purple-500/10 border border-purple-500/20 text-purple-400 font-bold rounded-xl hover:bg-purple-500 hover:text-white transition-colors text-sm text-center">Unduh Invoice</a>`;
+                        let hasPin = {{ Auth::user()->pin ? 'true' : 'false' }};
+                        if (hasPin) {
+                            document.getElementById('modalTrxActions').innerHTML += `<button type="button" onclick="bukaPinModal('${trx.id}')" class="flex-1 px-4 py-3 bg-purple-500/10 border border-purple-500/20 text-purple-400 font-bold rounded-xl hover:bg-purple-500 hover:text-white transition-colors text-sm text-center">Unduh Invoice</button>`;
+                        } else {
+                            document.getElementById('modalTrxActions').innerHTML += `<a href="/profil" class="flex-1 px-4 py-3 bg-purple-500/10 border border-purple-500/20 text-purple-400 font-bold rounded-xl hover:bg-purple-500 hover:text-white transition-colors text-sm text-center">Atur PIN Unduh</a>`;
+                        }
                     } else if(trx.status === 'Pending') {
                         document.getElementById('modalTrxStatus').innerHTML = `<span class="inline-flex items-center gap-1.5 text-[10px] px-2.5 py-1 bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 rounded font-bold uppercase tracking-wider"><span class="w-1.5 h-1.5 bg-yellow-400 rounded-full"></span> Pending</span>`;
                     } else {
@@ -739,7 +745,54 @@
                 modal.classList.add('hidden');
             }, 300);
         }
+
+        function bukaPinModal(trxId) {
+            const modal = document.getElementById('pinModal');
+            document.getElementById('pinForm').action = `/invoice/download/${trxId}`;
+            
+            modal.style.display = 'flex';
+            // Force reflow
+            void modal.offsetWidth;
+            
+            modal.classList.remove('opacity-0');
+            modal.querySelector('div').classList.remove('scale-95');
+            modal.querySelector('div').classList.add('scale-100');
+        }
+
+        function tutupPinModal() {
+            const modal = document.getElementById('pinModal');
+            
+            modal.classList.add('opacity-0');
+            modal.querySelector('div').classList.add('scale-95');
+            modal.querySelector('div').classList.remove('scale-100');
+            
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300);
+        }
 </script>
+
+    <!-- Modal PIN Invoice -->
+    <div id="pinModal" class="fixed inset-0 z-[200] items-center justify-center bg-black/60 backdrop-blur-sm transition-opacity duration-300 opacity-0" style="display:none;">
+        <div class="bg-[#12151C] border border-[#7C3AED]/30 p-6 rounded-3xl w-[90%] max-w-sm shadow-[0_0_30px_rgba(124,58,237,0.15)] transform scale-95 transition-transform duration-300">
+            <div class="flex items-center justify-center w-16 h-16 mx-auto bg-[#7C3AED]/20 rounded-full mb-4">
+                <svg class="w-8 h-8 text-[#a78bfa]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                </svg>
+            </div>
+            <h3 class="text-xl font-black text-white text-center mb-2">Keamanan Invoice</h3>
+            <p class="text-sm text-gray-400 text-center mb-6">Masukkan 6-digit PIN Unduh Invoice Anda.</p>
+            <form id="pinForm" method="POST" action="">
+                @csrf
+                <input type="password" name="pin" maxlength="6" inputmode="numeric" required class="w-full bg-[#0A0C10] border border-[#2A2E37] text-white text-center text-lg tracking-[0.5em] rounded-xl px-4 py-3 mb-4 focus:outline-none focus:border-[#7C3AED] transition-colors" placeholder="••••••">
+                <div class="flex gap-3">
+                    <button type="button" onclick="tutupPinModal()" class="flex-1 py-3 text-sm font-bold text-gray-400 bg-black/50 hover:bg-white/10 border border-white/10 rounded-xl transition-all">Batal</button>
+                    <button type="submit" class="flex-1 py-3 text-sm font-bold text-white bg-[#7C3AED] hover:bg-[#6D28D9] rounded-xl transition-all shadow-[0_0_15px_rgba(124,58,237,0.3)]">Konfirmasi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
 @include('components.toast-notification')
 </body>
 

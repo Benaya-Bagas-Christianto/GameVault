@@ -215,12 +215,16 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/orders/{id}/cancel-duplicates', [ProfilController::class, 'cancelDuplicates']);
     Route::post('/review/simpan', [OrderController::class, 'simpanReview']); 
     Route::post('/review/delete', [OrderController::class, 'hapusReview']); 
+
+    Route::post('/profil/set-pin', [ProfilController::class, 'setPin']); 
     
-    Route::get('/invoice/download/{id}', [InvoiceController::class, 'download']);
+    Route::post('/invoice/download/{id}', [InvoiceController::class, 'download']);
 
     // Rute Refund
     Route::post('/refund/request', [RefundController::class, 'requestRefund']);
     Route::post('/refund/cancel', [RefundController::class, 'cancelRefund']);
+    Route::get('/refund/check-notif', [RefundController::class, 'checkNotif']);
+    Route::post('/refund/mark-notified/{id}', [RefundController::class, 'markNotified']);
 });
 
 // Route untuk Fitur Ganti Email Akun

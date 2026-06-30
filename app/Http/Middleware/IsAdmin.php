@@ -17,6 +17,6 @@ class IsAdmin
         }
 
         // Kalau bukan admin, tendang balik ke halaman utama
-        return redirect('/')->with('pesan', 'Akses Ditolak! Anda bukan Admin.')->with('status', 'error');
+        return redirect('/')->with('msg', 'Akses Ditolak! Anda bukan Admin.')->with('status', 'error');
     }
 }

@@ -222,7 +222,7 @@
 
 
                 {{-- BUNGKUS SELURUH KONTEN DENGAN FORM AGAR BANNER BISA TERSIMPAN BERSAMAAN --}}
-                <form action="/profil/update" method="POST" enctype="multipart/form-data" onsubmit="window.showLoadingOverlay()">
+                <form id="formProfilUpdate" action="/profil/update" method="POST" enctype="multipart/form-data" onsubmit="window.showLoadingOverlay()">
                     @csrf
 
                     {{-- BANNER & HEADER PROFIL --}}
@@ -318,43 +318,43 @@
                             </div>
                         </div>
                     </div>
+                </form>
 
-                    {{-- FORM GRID (Kiri: Profil, Kanan: Email & Keamanan) --}}
-
+                    {{-- FORM GRID (Kiri: Profil & Email, Kanan: Keamanan) --}}
                     <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
 
-                        {{-- KOLOM KIRI: INFORMASI PROFIL --}}
-                        <div class="xl:col-span-2 panel-bg p-6 lg:p-8 rounded-2xl">
-                            <h2 class="text-xs font-bold text-gray-400 uppercase tracking-widest border-b border-[#1f1f1f] pb-4 mb-6">Informasi Profil</h2>
+                        {{-- KOLOM KIRI: INFORMASI PROFIL & EMAIL --}}
+                        <div class="xl:col-span-2 space-y-6">
+                            
+                            {{-- Kotak Informasi Profil --}}
+                            <div class="panel-bg p-6 lg:p-8 rounded-2xl">
+                                <h2 class="text-xs font-bold text-gray-400 uppercase tracking-widest border-b border-[#1f1f1f] pb-4 mb-6">Informasi Profil</h2>
 
-                            <div class="space-y-6">
-                                {{-- Input tersembunyi --}}
-                                <input type="file" id="fotoInput" accept="image/*" class="hidden">
-                                <input type="hidden" name="cropped_photo" id="croppedPhotoInput">
+                                <div class="space-y-6">
+                                    {{-- Input tersembunyi --}}
+                                    <input type="file" id="fotoInput" form="formProfilUpdate" accept="image/*" class="hidden">
+                                    <input type="hidden" name="cropped_photo" form="formProfilUpdate" id="croppedPhotoInput">
 
-                                {{-- Baris 1: Username --}}
-                                <div>
-                                    <div class="flex justify-between items-end mb-2">
-                                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">Username</label>
-                                        <span class="text-[9px] text-green-400 font-bold tracking-widest">✓ Tersedia</span>
+                                    {{-- Baris 1: Username --}}
+                                    <div>
+                                        <div class="flex justify-between items-end mb-2">
+                                            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">Username</label>
+                                            <span class="text-[9px] text-green-400 font-bold tracking-widest">✓ Tersedia</span>
+                                        </div>
+                                        <input type="text" value="{{ Auth::user()->username }}" disabled class="w-full px-4 py-3.5 bg-[#050505] border border-[#1f1f1f] rounded-xl text-gray-500 cursor-not-allowed text-sm font-medium">
+                                        <p class="text-[10px] text-gray-600 mt-2">*Username bersifat permanen dan tidak dapat diubah.</p>
                                     </div>
-                                    <input type="text" value="{{ Auth::user()->username }}" disabled class="w-full px-4 py-3.5 bg-[#050505] border border-[#1f1f1f] rounded-xl text-gray-500 cursor-not-allowed text-sm font-medium">
-                                    <p class="text-[10px] text-gray-600 mt-2">*Username bersifat permanen dan tidak dapat diubah.</p>
-                                </div>
 
-                                {{-- Baris 2: Nama Lengkap --}}
-                                <div>
-                                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Nama Lengkap</label>
-                                    <input type="text" name="name" value="{{ Auth::user()->name ?? '' }}" placeholder="Masukkan nama lengkap kamu" class="w-full px-4 py-3.5 input-bg rounded-xl text-white placeholder-gray-600 focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED]/30 transition-colors text-sm">
+                                    {{-- Baris 2: Nama Lengkap --}}
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Nama Lengkap</label>
+                                        <input type="text" name="name" form="formProfilUpdate" value="{{ Auth::user()->name ?? '' }}" placeholder="Masukkan nama lengkap kamu" class="w-full px-4 py-3.5 input-bg rounded-xl text-white placeholder-gray-600 focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED]/30 transition-colors text-sm">
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-
-                        {{-- KOLOM KANAN: EMAIL & KEAMANAN --}}
-                        <div class="space-y-6">
 
                             {{-- Kotak Email --}}
-                            <div class="panel-bg p-6 rounded-2xl">
+                            <div class="panel-bg p-6 lg:p-8 rounded-2xl">
                                 <h2 class="text-xs font-bold text-gray-400 uppercase tracking-widest border-b border-[#1f1f1f] pb-4 mb-6">Alamat Email</h2>
                                 <div class="flex justify-between items-end mb-2">
                                     <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest">Email Terdaftar</label>
@@ -367,6 +367,11 @@
                                     Ubah Email Akun
                                 </a>
                             </div>
+
+                        </div>
+
+                        {{-- KOLOM KANAN: KEAMANAN --}}
+                        <div class="space-y-6">
 
                             {{-- Kotak Keamanan (Ganti Password) --}}
                             <div class="panel-bg p-6 rounded-2xl">
@@ -386,17 +391,92 @@
                                 </a>
                             </div>
 
+                            {{-- FORM PIN INVOICE --}}
+                            <div class="panel-bg p-6 rounded-2xl">
+                                <h2 class="text-xs font-bold text-gray-400 uppercase tracking-widest border-b border-[#1f1f1f] pb-4 mb-6">Keamanan Unduhan (PIN Invoice)</h2>
+                                <form action="/profil/set-pin" method="POST">
+                                    @csrf
+                                    <p class="text-xs text-gray-400 leading-relaxed mb-6">
+                                        PIN 6-digit digunakan untuk mengamankan fitur unduh invoice. Pastikan PIN Anda mudah diingat tapi sulit ditebak.
+                                    </p>
+
+                                    @if(Auth::user()->pin)
+                                        {{-- Jika sudah punya PIN, form ubah PIN --}}
+                                        <div class="space-y-5">
+                                            <div>
+                                                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">PIN LAMA</label>
+                                                <div class="relative">
+                                                    <input type="password" id="old_pin" name="old_pin" maxlength="6" inputmode="numeric" class="w-full bg-[#12151C] border border-[#2A2E37] text-white text-sm rounded-xl px-4 py-3 pr-10 focus:outline-none focus:border-[#7C3AED] transition-colors" placeholder="Masukkan 6 angka PIN Lama">
+                                                    <button type="button" onclick="togglePinVisibility('old_pin')" class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-300 transition-colors">
+                                                        <svg id="old_pin_icon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <div>
+                                                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">PIN BARU</label>
+                                                    <div class="relative">
+                                                        <input type="password" id="new_pin_update" name="new_pin" maxlength="6" inputmode="numeric" class="w-full bg-[#12151C] border border-[#2A2E37] text-white text-sm rounded-xl px-4 py-3 pr-10 focus:outline-none focus:border-[#7C3AED] transition-colors" placeholder="6 Angka">
+                                                        <button type="button" onclick="togglePinVisibility('new_pin_update')" class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-300 transition-colors">
+                                                            <svg id="new_pin_update_icon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">KONFIRMASI PIN</label>
+                                                    <div class="relative">
+                                                        <input type="password" id="new_pin_confirmation_update" name="new_pin_confirmation" maxlength="6" inputmode="numeric" class="w-full bg-[#12151C] border border-[#2A2E37] text-white text-sm rounded-xl px-4 py-3 pr-10 focus:outline-none focus:border-[#7C3AED] transition-colors" placeholder="6 Angka">
+                                                        <button type="button" onclick="togglePinVisibility('new_pin_confirmation_update')" class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-300 transition-colors">
+                                                            <svg id="new_pin_confirmation_update_icon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <button type="submit" class="w-full mt-2 bg-[#7C3AED]/10 hover:bg-[#7C3AED]/20 border border-[#7C3AED]/30 text-[#a78bfa] hover:text-white text-xs font-bold py-3 rounded-xl transition-all uppercase tracking-widest">
+                                                Perbarui PIN
+                                            </button>
+                                        </div>
+                                    @else
+                                        {{-- Jika belum punya PIN, form buat PIN baru --}}
+                                        <div class="space-y-5">
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <div>
+                                                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">BUAT PIN (6 ANGKA)</label>
+                                                    <div class="relative">
+                                                        <input type="password" id="new_pin_create" name="new_pin" maxlength="6" inputmode="numeric" class="w-full bg-[#12151C] border border-[#2A2E37] text-white text-sm rounded-xl px-4 py-3 pr-10 focus:outline-none focus:border-[#7C3AED] transition-colors" placeholder="Contoh: 123456">
+                                                        <button type="button" onclick="togglePinVisibility('new_pin_create')" class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-300 transition-colors">
+                                                            <svg id="new_pin_create_icon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">ULANGI PIN</label>
+                                                    <div class="relative">
+                                                        <input type="password" id="new_pin_confirmation_create" name="new_pin_confirmation" maxlength="6" inputmode="numeric" class="w-full bg-[#12151C] border border-[#2A2E37] text-white text-sm rounded-xl px-4 py-3 pr-10 focus:outline-none focus:border-[#7C3AED] transition-colors" placeholder="Contoh: 123456">
+                                                        <button type="button" onclick="togglePinVisibility('new_pin_confirmation_create')" class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-300 transition-colors">
+                                                            <svg id="new_pin_confirmation_create_icon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <button type="submit" class="w-full mt-2 bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-xs font-bold py-3 rounded-xl transition-all uppercase tracking-widest">
+                                                Simpan PIN
+                                            </button>
+                                        </div>
+                                    @endif
+                                </form>
+                            </div>
+
                         </div>
                     </div>
 
                     {{-- TOMBOL AKSI SIMPAN --}}
                     <div class="flex items-center justify-end gap-4 mt-8 pt-6 border-t border-[#1f1f1f]">
                         <a href="/" class="text-xs font-bold text-gray-500 hover:text-white transition-colors uppercase tracking-widest">Batal</a>
-                        <button type="submit" class="px-8 py-3.5 bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-xs font-bold uppercase tracking-widest rounded-xl transition-all shadow-[0_0_20px_rgba(124,58,237,0.2)]">
+                        <button type="submit" form="formProfilUpdate" class="px-8 py-3.5 bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-xs font-bold uppercase tracking-widest rounded-xl transition-all shadow-[0_0_20px_rgba(124,58,237,0.2)]">
                             Simpan Perubahan
                         </button>
                     </div>
-                </form>
 
                 {{-- Form Hidden untuk Mailtrap Reset Password --}}
                 <form id="formResetPassword" action="/forgot-password" method="POST" class="hidden">
@@ -609,6 +689,44 @@
 
 @include('components.loading-overlay')
 @include('components.toast-notification')
+@auth
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        fetch('/refund/check-notif')
+            .then(res => res.json())
+            .then(data => {
+                if(data.notifications && data.notifications.length > 0) {
+                    data.notifications.forEach((notif) => {
+                        if (typeof showToast === 'function') {
+                            showToast(notif.message, notif.type === 'error', function() {
+                                fetch(`/refund/mark-notified/${notif.id}`, {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                    }
+                                }).catch(err => console.error('Error marking notified:', err));
+                            });
+                        }
+                    });
+                }
+            })
+            .catch(err => console.error('Error fetching refund notifs:', err));
+    });
+
+    function togglePinVisibility(inputId) {
+        const input = document.getElementById(inputId);
+        const icon = document.getElementById(inputId + '_icon');
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>';
+        } else {
+            input.type = 'password';
+            icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>';
+        }
+    }
+</script>
+@endauth
 </body>
 
 </html>

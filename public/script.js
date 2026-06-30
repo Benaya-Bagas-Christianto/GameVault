@@ -20,7 +20,7 @@ let myWishlistIDs = [];
 console.log("Script.js Laravel Version Loaded");
 
 // --- CUSTOM TOAST NOTIFICATION ---
-function showToast(message, type = 'info') {
+function showToast(message, type = 'info', onClickCallback = null) {
     let container = document.getElementById('toast-container');
     if (!container) {
         container = document.createElement('div');
@@ -49,8 +49,19 @@ function showToast(message, type = 'info') {
         });
     };
 
-    const timer = setTimeout(autoDismiss, 3000);
-    toast.onclick = () => { clearTimeout(timer); toast.remove(); };
+    // We don't auto-dismiss if there's an onClickCallback (meaning it requires user action)
+    let timer = null;
+    if (onClickCallback === null) {
+        timer = setTimeout(autoDismiss, 3000);
+    }
+
+    toast.onclick = () => {
+        if(timer) clearTimeout(timer); 
+        toast.remove(); 
+        if(typeof onClickCallback === 'function') {
+            onClickCallback();
+        }
+    };
     container.appendChild(toast);
 }
 

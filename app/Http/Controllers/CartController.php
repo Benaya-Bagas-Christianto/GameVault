@@ -27,7 +27,7 @@ class CartController extends Controller
 
     public function add(Request $request) {
         $game = Game::find($request->product_id ?? $request->game_id);
-        if (!$game || $game->stok < 1) return response()->json(['status'=>'error','message'=>'Stok tidak mencukupi']);
+        if (!$game) return response()->json(['status'=>'error','message'=>'Game tidak ditemukan']);
 
         $keranjang = Keranjang::where('user_id', Auth::id())->where('game_id', $game->id)->first();
         if ($keranjang) {

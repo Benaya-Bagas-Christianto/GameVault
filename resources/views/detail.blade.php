@@ -165,6 +165,7 @@
                         ->join('tb_transaksi', 'tb_detail_transaksi.transaksi_id', '=', 'tb_transaksi.id')
                         ->where('tb_transaksi.user_id', Auth::id())
                         ->where('tb_transaksi.status', 'Success')
+                        ->where('tb_detail_transaksi.is_refunded', false)
                         ->where('tb_detail_transaksi.game_id', $game->id)
                         ->exists();
                 }

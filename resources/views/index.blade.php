@@ -234,6 +234,7 @@
     ->join('tb_transaksi', 'tb_detail_transaksi.transaksi_id', '=', 'tb_transaksi.id')
     ->where('tb_transaksi.user_id', $userId)
     ->where('tb_transaksi.status', 'Success')
+    ->where('tb_detail_transaksi.is_refunded', false)
     ->pluck('tb_detail_transaksi.game_id')->toArray();
 
     $cartGameIds = \App\Models\Keranjang::where('user_id', $userId)->pluck('game_id')->toArray();
@@ -581,14 +582,14 @@
                         </div>
                         <?php
                         $genre_showcase = [
-                            ['name' => 'Action', 'count' => '8 game', 'icon' => '⚔️', 'color' => 'bg-gradient-to-br from-red-900/40 to-red-950/60', 'border' => 'border-red-800/30', 'hover' => 'hover:border-red-600/50 hover:shadow-[0_0_20px_rgba(220,38,38,0.3)]'],
-                            ['name' => 'RPG', 'count' => '6 game', 'icon' => '🎭', 'color' => 'bg-gradient-to-br from-purple-900/40 to-purple-950/60', 'border' => 'border-purple-800/30', 'hover' => 'hover:border-purple-600/50 hover:shadow-[0_0_20px_rgba(147,51,234,0.3)]'],
-                            ['name' => 'FPS', 'count' => '5 game', 'icon' => '🎯', 'color' => 'bg-gradient-to-br from-green-900/40 to-green-950/60', 'border' => 'border-green-800/30', 'hover' => 'hover:border-green-600/50 hover:shadow-[0_0_20px_rgba(22,163,74,0.3)]'],
-                            ['name' => 'Racing', 'count' => '4 game', 'icon' => '🏎️', 'color' => 'bg-gradient-to-br from-orange-900/40 to-orange-950/60', 'border' => 'border-orange-800/30', 'hover' => 'hover:border-orange-600/50 hover:shadow-[0_0_20px_rgba(249,115,22,0.3)]'],
-                            ['name' => 'Sports', 'count' => '3 game', 'icon' => '⚽', 'color' => 'bg-gradient-to-br from-green-900/40 to-green-950/60', 'border' => 'border-green-800/30', 'hover' => 'hover:border-green-600/50 hover:shadow-[0_0_20px_rgba(34,197,94,0.3)]'],
-                            ['name' => 'Horror', 'count' => '3 game', 'icon' => '💀', 'color' => 'bg-gradient-to-br from-gray-900/40 to-gray-950/60', 'border' => 'border-gray-800/30', 'hover' => 'hover:border-gray-600/50 hover:shadow-[0_0_20px_rgba(107,114,128,0.3)]'],
-                            ['name' => 'Strategy', 'count' => '4 game', 'icon' => '♟️', 'color' => 'bg-gradient-to-br from-blue-900/40 to-blue-950/60', 'border' => 'border-blue-800/30', 'hover' => 'hover:border-blue-600/50 hover:shadow-[0_0_20px_rgba(37,99,235,0.3)]'],
-                            ['name' => 'Open World', 'count' => '7 game', 'icon' => '🗺️', 'color' => 'bg-gradient-to-br from-cyan-900/40 to-cyan-950/60', 'border' => 'border-cyan-800/30', 'hover' => 'hover:border-cyan-600/50 hover:shadow-[0_0_20px_rgba(6,182,212,0.3)]'],
+                            ['name' => 'Action', 'count' => \App\Models\Game::where('genre', 'like', '%Action%')->count() . ' game', 'icon' => '⚔️', 'color' => 'bg-gradient-to-br from-red-900/40 to-red-950/60', 'border' => 'border-red-800/30', 'hover' => 'hover:border-red-600/50 hover:shadow-[0_0_20px_rgba(220,38,38,0.3)]'],
+                            ['name' => 'RPG', 'count' => \App\Models\Game::where('genre', 'like', '%RPG%')->count() . ' game', 'icon' => '🎭', 'color' => 'bg-gradient-to-br from-purple-900/40 to-purple-950/60', 'border' => 'border-purple-800/30', 'hover' => 'hover:border-purple-600/50 hover:shadow-[0_0_20px_rgba(147,51,234,0.3)]'],
+                            ['name' => 'FPS', 'count' => \App\Models\Game::where('genre', 'like', '%FPS%')->count() . ' game', 'icon' => '🎯', 'color' => 'bg-gradient-to-br from-green-900/40 to-green-950/60', 'border' => 'border-green-800/30', 'hover' => 'hover:border-green-600/50 hover:shadow-[0_0_20px_rgba(22,163,74,0.3)]'],
+                            ['name' => 'Racing', 'count' => \App\Models\Game::where('genre', 'like', '%Racing%')->count() . ' game', 'icon' => '🏎️', 'color' => 'bg-gradient-to-br from-orange-900/40 to-orange-950/60', 'border' => 'border-orange-800/30', 'hover' => 'hover:border-orange-600/50 hover:shadow-[0_0_20px_rgba(249,115,22,0.3)]'],
+                            ['name' => 'Sports', 'count' => \App\Models\Game::where('genre', 'like', '%Sports%')->count() . ' game', 'icon' => '⚽', 'color' => 'bg-gradient-to-br from-green-900/40 to-green-950/60', 'border' => 'border-green-800/30', 'hover' => 'hover:border-green-600/50 hover:shadow-[0_0_20px_rgba(34,197,94,0.3)]'],
+                            ['name' => 'Horror', 'count' => \App\Models\Game::where('genre', 'like', '%Horror%')->count() . ' game', 'icon' => '💀', 'color' => 'bg-gradient-to-br from-gray-900/40 to-gray-950/60', 'border' => 'border-gray-800/30', 'hover' => 'hover:border-gray-600/50 hover:shadow-[0_0_20px_rgba(107,114,128,0.3)]'],
+                            ['name' => 'Strategy', 'count' => \App\Models\Game::where('genre', 'like', '%Strategy%')->count() . ' game', 'icon' => '♟️', 'color' => 'bg-gradient-to-br from-blue-900/40 to-blue-950/60', 'border' => 'border-blue-800/30', 'hover' => 'hover:border-blue-600/50 hover:shadow-[0_0_20px_rgba(37,99,235,0.3)]'],
+                            ['name' => 'Open World', 'count' => \App\Models\Game::where('genre', 'like', '%Open World%')->count() . ' game', 'icon' => '🗺️', 'color' => 'bg-gradient-to-br from-cyan-900/40 to-cyan-950/60', 'border' => 'border-cyan-800/30', 'hover' => 'hover:border-cyan-600/50 hover:shadow-[0_0_20px_rgba(6,182,212,0.3)]'],
                         ];
                         ?>
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -1386,11 +1387,11 @@
                 });
 
                 searchInput.addEventListener('input', function() {
-                    // Bersihkan timer (Debounce) agar server tidak ngelag saat ngetik cepat
+                    // Bersiin timer biar server ora ngelag pas ngetik cepet
                     clearTimeout(timeout);
                     const query = this.value.trim();
 
-                    // Sembunyikan kalau ketikan kurang dari 2 huruf
+                    // Sembunyiin kalo ketikan kurang dari 2 huruf
                     if (query.length < 2) {
                         searchResults.classList.add('hidden');
                         searchResults.classList.remove('flex');
@@ -1408,7 +1409,7 @@
                         fetch(`/search/autocomplete?query=${encodeURIComponent(query)}`)
                             .then(response => response.json())
                             .then(data => {
-                                searchResults.innerHTML = ''; // Kosongkan loading
+                                searchResults.innerHTML = ''; 
 
                                 if (data.length > 0) {
                                     // Looping data game dari database
@@ -1416,7 +1417,7 @@
                                         // Cek Harga
                                         const priceText = game.price == 0 ? 'Gratis' : 'Rp ' + new Intl.NumberFormat('id-ID').format(game.price);
 
-                                        // Desain HTML Item ala Steam
+                                        // Desain HTML Item biar kayak Steam hehe awok awok
                                         const item = document.createElement('a');
                                         item.href = `/game/${game.id}`;
                                         item.className = 'flex items-center gap-3 p-3 hover:bg-[#2A2E37] border-b border-white/5 transition-colors cursor-pointer';
@@ -2395,7 +2396,34 @@
         })();
     </script>
 
+
 @include('components.toast-notification')
+@auth
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        fetch('/refund/check-notif')
+            .then(res => res.json())
+            .then(data => {
+                if(data.notifications && data.notifications.length > 0) {
+                    data.notifications.forEach((notif) => {
+                        if (typeof showToast === 'function') {
+                            showToast(notif.message, notif.type === 'error', function() {
+                                fetch(`/refund/mark-notified/${notif.id}`, {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                    }
+                                }).catch(err => console.error('Error marking notified:', err));
+                            });
+                        }
+                    });
+                }
+            })
+            .catch(err => console.error('Error fetching refund notifs:', err));
+    });
+</script>
+@endauth
 </body>
 
 </html>

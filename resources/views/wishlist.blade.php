@@ -401,7 +401,15 @@ $serverWishlistIds = Auth::check() ? \App\Models\Wishlist::where('user_id', Auth
         };
 
         function renderWishlistPage() {
+            let isLoggedIn = @json(Auth::check());
             const grid = document.getElementById('wishlistPageGrid');
+            
+            if (!isLoggedIn) {
+                grid.innerHTML = `<div class="col-span-full flex flex-col items-center justify-center py-20 text-gray-500"><p class="mb-4">Silakan login untuk melihat wishlist.</p><a href="{{ url('/login') }}" class="px-6 py-2 bg-[#7C3AED] text-white rounded-lg font-bold">Login</a></div>`;
+                updatePageHeaders(0);
+                return;
+            }
+
             grid.innerHTML = `<div class="col-span-full flex flex-col items-center justify-center py-20 text-gray-500"><div class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-white mb-4"></div><p class="text-lg font-medium text-white">Memuat Wishlist...</p></div>`;
 
             fetch('/get_wishlist?t=' + new Date().getTime())

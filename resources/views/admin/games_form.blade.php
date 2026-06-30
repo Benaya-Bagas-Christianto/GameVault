@@ -185,7 +185,7 @@
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Tanggal Rilis</label>
-                                    <input type="date" name="release_date" value="{{ $game->release_date ? \Carbon\Carbon::parse($game->release_date)->format('Y-m-d') : '' }}"
+                                    <input type="date" name="release_date" value="{{ $game?->release_date ? \Carbon\Carbon::parse($game->release_date)->format('Y-m-d') : '' }}"
                                            class="w-full bg-white/5 border border-white/10 text-white text-sm rounded-xl focus:ring-pink-500 focus:border-pink-500 block p-3 transition-colors placeholder-gray-500 [color-scheme:dark]">
                                 </div>
                             </div>

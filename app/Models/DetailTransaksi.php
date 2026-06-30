@@ -14,6 +14,10 @@ class DetailTransaksi extends Model
         return $this->belongsTo(Game::class, 'game_id');
     }
 
+    public function transaksi() {
+        return $this->belongsTo(Transaksi::class, 'transaksi_id');
+    }
+
     public function refund() {
         return $this->hasOne(Refund::class, 'detail_transaksi_id');
     }

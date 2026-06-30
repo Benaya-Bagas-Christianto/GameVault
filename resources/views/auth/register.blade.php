@@ -37,12 +37,18 @@
 
         {{-- Penampil Pesan Error (Misal username/email sudah dipakai, atau password tidak cocok) --}}
         @if ($errors->any() || (session('msg') && session('status') == 'error'))
-            <div class="mb-5 p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-xs text-center font-bold">
+            <div class="mb-5 p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-xs font-bold text-left space-y-2">
                 @if(session('msg'))
-                    <p>⚠️ {{ session('msg') }}</p>
+                    <p class="flex items-center gap-1.5 justify-center">
+                        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="17" r="1" fill="currentColor"/><path d="M12 10L12 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.44722 18.1056L10.2111 4.57771C10.9482 3.10361 13.0518 3.10362 13.7889 4.57771L20.5528 18.1056C21.2177 19.4354 20.2507 21 18.7639 21H5.23607C3.7493 21 2.78231 19.4354 3.44722 18.1056Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        {{ session('msg') }}
+                    </p>
                 @endif
                 @foreach ($errors->all() as $error)
-                    <p>⚠️ {{ $error }}</p>
+                    <p class="flex items-center gap-1.5 justify-center">
+                        <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="17" r="1" fill="currentColor"/><path d="M12 10L12 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.44722 18.1056L10.2111 4.57771C10.9482 3.10361 13.0518 3.10362 13.7889 4.57771L20.5528 18.1056C21.2177 19.4354 20.2507 21 18.7639 21H5.23607C3.7493 21 2.78231 19.4354 3.44722 18.1056Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        {{ $error }}
+                    </p>
                 @endforeach
             </div>
         @endif
@@ -70,7 +76,7 @@
                 <div>
                     <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Password</label>
                     <div class="relative">
-                        <input type="password" id="passwordInput" name="password" required minlength="8" placeholder="••••••••" pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}" title="Password harus mengandung huruf besar, kecil, angka, dan simbol" 
+                        <input type="password" id="passwordInput" name="password" required minlength="8" placeholder="••••••••" pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}" title="Password harus mengandung huruf besar, kecil, angka, dan simbol" value="{{ old('password') }}"
                                class="w-full bg-[#0A0C10] border border-white/10 rounded-xl px-4 py-3 pr-10 text-sm text-white focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/50 transition-all">
                         <button type="button" onclick="togglePassword('passwordInput', 'eyeIcon1')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-white transition-colors">
                             <svg id="eyeIcon1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
@@ -88,7 +94,7 @@
                             <div id="bar3" class="h-1 flex-1 rounded-full bg-white/10 transition-all duration-300"></div>
                             <div id="bar4" class="h-1 flex-1 rounded-full bg-white/10 transition-all duration-300"></div>
                         </div>
-                        <p id="strengthText" class="text-[10px] font-bold tracking-wider uppercase text-gray-500"></p>
+                        <p id="strengthText" class="text-[10px] font-bold tracking-wider uppercase text-gray-500 flex items-center gap-1"></p>
                     </div>
                 </div>
 
@@ -96,7 +102,7 @@
                 <div>
                     <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Ulangi Password</label>
                     <div class="relative">
-                        <input type="password" id="confirmPasswordInput" name="confirm_password" required minlength="8" placeholder="••••••••" pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}" title="Password harus mengandung huruf besar, kecil, angka, dan simbol" 
+                        <input type="password" id="confirmPasswordInput" name="confirm_password" required minlength="8" placeholder="••••••••" pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}" title="Password harus mengandung huruf besar, kecil, angka, dan simbol" value="{{ old('confirm_password') }}"
                                class="w-full bg-[#0A0C10] border border-white/10 rounded-xl px-4 py-3 pr-10 text-sm text-white focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/50 transition-all">
                         <button type="button" onclick="togglePassword('confirmPasswordInput', 'eyeIcon2')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-white transition-colors">
                             <svg id="eyeIcon2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
@@ -107,6 +113,42 @@
                     </div>
                 </div>
             </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {{-- PIN --}}
+                <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">BUAT PIN (6 ANGKA)</label>
+                    <div class="relative">
+                        <input type="password" id="pinInput" name="pin" maxlength="6" inputmode="numeric" required placeholder="Contoh: 123456" value="{{ old('pin') }}"
+                               class="w-full bg-[#0A0C10] border border-white/10 rounded-xl px-4 py-3 pr-10 text-sm text-white focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/50 transition-all">
+                        <button type="button" onclick="togglePassword('pinInput', 'eyeIcon3')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-white transition-colors">
+                            <svg id="eyeIcon3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                {{-- Konfirmasi PIN --}}
+                <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">ULANGI PIN</label>
+                    <div class="relative">
+                        <input type="password" id="confirmPinInput" name="pin_confirmation" maxlength="6" inputmode="numeric" required placeholder="Contoh: 123456" value="{{ old('pin_confirmation') }}"
+                               class="w-full bg-[#0A0C10] border border-white/10 rounded-xl px-4 py-3 pr-10 text-sm text-white focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/50 transition-all">
+                        <button type="button" onclick="togglePassword('confirmPinInput', 'eyeIcon4')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-white transition-colors">
+                            <svg id="eyeIcon4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <p class="text-[10px] text-gray-500 leading-relaxed mt-2 mb-4">
+                *PIN 6-digit akan digunakan untuk mengamankan fitur-fitur penting seperti pengunduhan invoice.
+            </p>
 
             {{-- Tombol Submit --}}
             <div class="pt-4">
@@ -160,29 +202,29 @@
             if (strength <= 2) {
                 // Weak
                 bar1.classList.add('bg-red-500', 'shadow-[0_0_8px_rgba(239,68,68,0.5)]');
-                strengthText.textContent = '⚠️ Lemah';
-                strengthText.className = 'text-[10px] font-bold tracking-wider uppercase text-red-400';
+                strengthText.innerHTML = '<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="17" r="1" fill="currentColor"/><path d="M12 10L12 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.44722 18.1056L10.2111 4.57771C10.9482 3.10361 13.0518 3.10362 13.7889 4.57771L20.5528 18.1056C21.2177 19.4354 20.2507 21 18.7639 21H5.23607C3.7493 21 2.78231 19.4354 3.44722 18.1056Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Lemah';
+                strengthText.className = 'text-[10px] font-bold tracking-wider uppercase text-red-400 flex items-center gap-1';
             } else if (strength <= 3) {
                 // Medium
                 bar1.classList.add('bg-yellow-500', 'shadow-[0_0_8px_rgba(234,179,8,0.5)]');
                 bar2.classList.add('bg-yellow-500', 'shadow-[0_0_8px_rgba(234,179,8,0.5)]');
-                strengthText.textContent = '⚡ Sedang';
-                strengthText.className = 'text-[10px] font-bold tracking-wider uppercase text-yellow-400';
+                strengthText.innerHTML = '⚡ Sedang';
+                strengthText.className = 'text-[10px] font-bold tracking-wider uppercase text-yellow-400 flex items-center gap-1';
             } else if (strength === 4) {
                 // Strong
                 bar1.classList.add('bg-green-500', 'shadow-[0_0_8px_rgba(34,197,94,0.5)]');
                 bar2.classList.add('bg-green-500', 'shadow-[0_0_8px_rgba(34,197,94,0.5)]');
                 bar3.classList.add('bg-green-500', 'shadow-[0_0_8px_rgba(34,197,94,0.5)]');
-                strengthText.textContent = '✅ Kuat';
-                strengthText.className = 'text-[10px] font-bold tracking-wider uppercase text-green-400';
+                strengthText.innerHTML = '✅ Kuat';
+                strengthText.className = 'text-[10px] font-bold tracking-wider uppercase text-green-400 flex items-center gap-1';
             } else {
                 // Very Strong
                 bar1.classList.add('bg-purple-500', 'shadow-[0_0_10px_rgba(168,85,247,0.6)]');
                 bar2.classList.add('bg-purple-500', 'shadow-[0_0_10px_rgba(168,85,247,0.6)]');
                 bar3.classList.add('bg-purple-500', 'shadow-[0_0_10px_rgba(168,85,247,0.6)]');
                 bar4.classList.add('bg-purple-500', 'shadow-[0_0_10px_rgba(168,85,247,0.6)]');
-                strengthText.textContent = '🔒 Sangat Kuat';
-                strengthText.className = 'text-[10px] font-bold tracking-wider uppercase text-purple-400';
+                strengthText.innerHTML = '<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 14.5V16.5M7 10.0288C7.47142 10 8.05259 10 8.8 10H15.2C15.9474 10 16.5286 10 17 10.0288M7 10.0288C6.41168 10.0647 5.99429 10.1455 5.63803 10.327C5.07354 10.6146 4.6146 11.0735 4.32698 11.638C4 12.2798 4 13.1198 4 14.8V16.2C4 17.8802 4 18.7202 4.32698 19.362C4.6146 19.9265 5.07354 20.3854 5.63803 20.673C6.27976 21 7.11984 21 8.8 21H15.2C16.8802 21 17.7202 21 18.362 20.673C18.9265 20.3854 19.3854 19.9265 19.673 19.362C20 18.7202 20 17.8802 20 16.2V14.8C20 13.1198 20 12.2798 19.673 11.638C19.3854 11.0735 18.9265 10.6146 18.362 10.327C18.0057 10.1455 17.5883 10.0647 17 10.0288M7 10.0288V8C7 5.23858 9.23858 3 12 3C14.7614 3 17 5.23858 17 8V10.0288" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Sangat Kuat';
+                strengthText.className = 'text-[10px] font-bold tracking-wider uppercase text-purple-400 flex items-center gap-1';
             }
         });
 

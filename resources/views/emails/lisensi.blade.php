@@ -99,7 +99,7 @@
             <div class="game-name">{{ $item->name }}</div>
             <div style="font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 1px;">Activation Key / Product Code:</div>
             <div class="key-box">
-                GV-{{ strtoupper(\Illuminate\Support\Str::random(4)) }}-{{ strtoupper(\Illuminate\Support\Str::random(4)) }}-{{ strtoupper(\Illuminate\Support\Str::random(4)) }}
+                {{ $item->activation_key }}
             </div>
         </div>
         @endforeach
